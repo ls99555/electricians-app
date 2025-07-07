@@ -1,6 +1,7 @@
 /**
  * Load and Demand Calculations
  * Maximum demand, diversity factors, and load assessment calculations
+ * Based on BS 7671 18th Edition Appendix A - Current-carrying capacity and voltage drop for cables
  */
 
 import type { 
@@ -13,10 +14,13 @@ import type {
 /**
  * Load Calculator
  * Calculate total electrical load with basic diversity
+ * Reference: BS 7671 Appendix A - Diversity factors
  */
 export class LoadCalculator {
   /**
-   * Calculate total electrical load
+   * Calculate total electrical load with diversity factors
+   * @param inputs Load calculation parameters
+   * @returns Load calculation results with breakdown
    */
   static calculate(inputs: LoadCalculatorInputs): {
     totalLoad: number;
@@ -25,6 +29,15 @@ export class LoadCalculator {
     breakdown: Array<{ item: string; load: number; diversity: number; demand: number }>;
   } {
     const { lighting, heating, cooking, sockets, otherLoads, installationType } = inputs;
+
+    // Input validation - BS 7671 compliance requires positive values
+    if (lighting < 0 || heating < 0 || cooking < 0 || sockets < 0 || otherLoads < 0) {
+      throw new Error('All load values must be non-negative');
+    }
+
+    if (!installationType) {
+      throw new Error('Installation type must be specified');
+    }
 
     const breakdown = [
       { item: 'Lighting', load: lighting, diversity: 0.9, demand: lighting * 0.9 },
@@ -46,6 +59,9 @@ export class LoadCalculator {
     };
   }
 
+  /**
+   * Calculate cooking diversity factor based on BS 7671 Appendix A
+   */
   private static getCookingDiversity(cookingLoad: number): number {
     // BS 7671 Appendix A diversity for cooking appliances
     if (cookingLoad <= 10000) return 1.0; // 100% for first 10kW
@@ -57,20 +73,23 @@ export class LoadCalculator {
 /**
  * Maximum Demand Calculator
  * Calculate maximum demand for domestic installations with proper diversity factors
+ * Reference: BS 7671 Appendix A - Diversity factors for domestic installations
  */
 export class MaximumDemandCalculator {
   /**
    * Calculate maximum demand for an installation
+   * @param inputs Installation parameters
+   * @returns Maximum demand calculation results
    */
   static calculate(inputs: {
-    lighting: number; // Total lighting load (W)
-    heating: number; // Total heating load (W)
-    waterHeating: number; // Water heating load (W)
-    cooking: Array<{ appliance: string; rating: number }>; // Cooking appliances
-    socketOutlets: number; // Number of socket outlets
-    largeAppliances: Array<{ appliance: string; rating: number }>; // Other large loads
+    lighting: number;
+    heating: number;
+    waterHeating: number;
+    cooking: Array<{ appliance: string; rating: number }>;
+    socketOutlets: number;
+    largeAppliances: Array<{ appliance: string; rating: number }>;
     installationType: InstallationType;
-    specialCircuits?: Array<{ circuit: string; rating: number }>; // Special circuits
+    specialCircuits?: Array<{ circuit: string; rating: number }>;
   }): MaximumDemandResult {
     const {
       lighting,
@@ -83,75 +102,70 @@ export class MaximumDemandCalculator {
       specialCircuits = []
     } = inputs;
 
-    try {
-      // Calculate demand for each load type
-      const lightingDemand = this.calculateLightingDemand(lighting);
-      const heatingDemand = this.calculateHeatingDemand(heating);
-      const waterHeatingDemand = this.calculateWaterHeatingDemand(waterHeating);
-      const cookingDemand = this.calculateCookingDemand(cooking);
-      const socketDemand = this.calculateSocketDemand(socketOutlets, installationType);
-      const applianceDemand = this.calculateApplianceDemand(largeAppliances);
-      const specialDemand = this.calculateSpecialCircuitDemand(specialCircuits);
-
-      // Calculate total connected load
-      const totalCookingRating = cooking.reduce((sum, item) => sum + item.rating, 0);
-      const totalApplianceRating = largeAppliances.reduce((sum, item) => sum + item.rating, 0);
-      const totalSpecialRating = specialCircuits.reduce((sum, item) => sum + item.rating, 0);
-      
-      const totalConnectedLoad = lighting + heating + waterHeating + totalCookingRating + 
-                                 (socketOutlets * 100) + totalApplianceRating + totalSpecialRating;
-
-      // Calculate maximum demand
-      const maximumDemand = lightingDemand + heatingDemand + waterHeatingDemand + 
-                           cookingDemand + socketDemand + applianceDemand + specialDemand;
-
-      // Overall diversity factor
-      const diversityFactor = totalConnectedLoad > 0 ? maximumDemand / totalConnectedLoad : 0;
-
-      // Load breakdown
-      const loadBreakdown = [
-        { appliance: 'Lighting', connectedLoad: lighting, demand: lightingDemand, diversity: lightingDemand / Math.max(lighting, 1) },
-        { appliance: 'Heating', connectedLoad: heating, demand: heatingDemand, diversity: heatingDemand / Math.max(heating, 1) },
-        { appliance: 'Water Heating', connectedLoad: waterHeating, demand: waterHeatingDemand, diversity: waterHeatingDemand / Math.max(waterHeating, 1) },
-        { appliance: 'Cooking', connectedLoad: totalCookingRating, demand: cookingDemand, diversity: cookingDemand / Math.max(totalCookingRating, 1) },
-        { appliance: 'Socket Outlets', connectedLoad: socketOutlets * 100, demand: socketDemand, diversity: socketDemand / Math.max(socketOutlets * 100, 1) },
-        { appliance: 'Large Appliances', connectedLoad: totalApplianceRating, demand: applianceDemand, diversity: applianceDemand / Math.max(totalApplianceRating, 1) },
-        { appliance: 'Special Circuits', connectedLoad: totalSpecialRating, demand: specialDemand, diversity: specialDemand / Math.max(totalSpecialRating, 1) }
-      ];
-
-      const recommendations = this.generateRecommendations(maximumDemand, totalConnectedLoad, installationType);
-
-      return {
-        totalConnectedLoad,
-        maximumDemand,
-        diversityFactor,
-        loadBreakdown,
-        recommendations,
-        regulation: 'BS 7671 Appendix A - Current-carrying capacity and voltage drop for cables'
-      };
-    } catch (error) {
-      throw new Error(`Maximum demand calculation error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    // Input validation - BS 7671 compliance
+    if (lighting < 0 || heating < 0 || waterHeating < 0 || socketOutlets < 0) {
+      throw new Error('All load values and socket outlet counts must be non-negative');
     }
-  }
 
-  private static calculateLightingDemand(lighting: number): number {
-    // 90% diversity for lighting (BS 7671 Appendix A)
-    return lighting * 0.9;
-  }
+    if (!installationType) {
+      throw new Error('Installation type must be specified for regulation compliance');
+    }
 
-  private static calculateHeatingDemand(heating: number): number {
-    // 100% diversity for heating (essential load)
-    return heating * 1.0;
-  }
+    if (!Array.isArray(cooking) || !Array.isArray(largeAppliances)) {
+      throw new Error('Cooking appliances and large appliances must be arrays');
+    }
 
-  private static calculateWaterHeatingDemand(waterHeating: number): number {
-    // 100% diversity for water heating
-    return waterHeating * 1.0;
-  }
-
-  private static calculateCookingDemand(cooking: Array<{ appliance: string; rating: number }>): number {
-    const totalCookingLoad = cooking.reduce((sum, item) => sum + item.rating, 0);
+    // Calculate total connected load
+    const totalCookingRating = cooking.reduce((sum, item) => sum + item.rating, 0);
+    const totalApplianceRating = largeAppliances.reduce((sum, item) => sum + item.rating, 0);
+    const totalSpecialRating = specialCircuits.reduce((sum, item) => sum + item.rating, 0);
     
+    const totalConnectedLoad = lighting + heating + waterHeating + totalCookingRating + 
+                               (socketOutlets * 100) + totalApplianceRating + totalSpecialRating;
+
+    // Calculate maximum demand using diversity factors
+    const lightingDemand = lighting * 0.9; // 90% for lighting
+    const heatingDemand = heating * 1.0; // 100% for heating
+    const waterHeatingDemand = waterHeating * 1.0; // 100% for water heating
+    const cookingDemand = this.calculateCookingDemand(totalCookingRating);
+    const socketDemand = this.calculateSocketDemand(socketOutlets, installationType);
+    const applianceDemand = totalApplianceRating * 1.0; // 100% for appliances
+    const specialDemand = totalSpecialRating * 1.0; // 100% for special circuits
+
+    const maximumDemand = lightingDemand + heatingDemand + waterHeatingDemand + 
+                         cookingDemand + socketDemand + applianceDemand + specialDemand;
+
+    // Overall diversity factor
+    const diversityFactor = totalConnectedLoad > 0 ? maximumDemand / totalConnectedLoad : 0;
+
+    // Load breakdown
+    const loadBreakdown = [
+      { appliance: 'Lighting', connectedLoad: lighting, demand: lightingDemand, diversity: lightingDemand / Math.max(lighting, 1) },
+      { appliance: 'Heating', connectedLoad: heating, demand: heatingDemand, diversity: heatingDemand / Math.max(heating, 1) },
+      { appliance: 'Water Heating', connectedLoad: waterHeating, demand: waterHeatingDemand, diversity: waterHeatingDemand / Math.max(waterHeating, 1) },
+      { appliance: 'Cooking', connectedLoad: totalCookingRating, demand: cookingDemand, diversity: cookingDemand / Math.max(totalCookingRating, 1) },
+      { appliance: 'Socket Outlets', connectedLoad: socketOutlets * 100, demand: socketDemand, diversity: socketDemand / Math.max(socketOutlets * 100, 1) },
+      { appliance: 'Large Appliances', connectedLoad: totalApplianceRating, demand: applianceDemand, diversity: applianceDemand / Math.max(totalApplianceRating, 1) },
+      { appliance: 'Special Circuits', connectedLoad: totalSpecialRating, demand: specialDemand, diversity: specialDemand / Math.max(totalSpecialRating, 1) }
+    ];
+
+    const recommendations = this.generateRecommendations(maximumDemand, installationType);
+
+    return {
+      totalConnectedLoad,
+      maximumDemand,
+      diversityFactor,
+      loadBreakdown,
+      recommendations,
+      regulation: 'BS 7671 Appendix A - Current-carrying capacity and voltage drop for cables'
+    };
+  }
+
+  /**
+   * Calculate cooking demand with appropriate diversity
+   * Reference: BS 7671 Appendix A - Cooking diversity factors
+   */
+  private static calculateCookingDemand(totalCookingLoad: number): number {
     // BS 7671 Appendix A cooking diversity
     if (totalCookingLoad <= 10000) {
       return totalCookingLoad * 1.0; // 100% for first 10kW
@@ -162,6 +176,10 @@ export class MaximumDemandCalculator {
     }
   }
 
+  /**
+   * Calculate socket outlet demand with diversity
+   * Reference: BS 7671 Appendix A - Socket outlet diversity factors
+   */
   private static calculateSocketDemand(socketOutlets: number, installationType: InstallationType): number {
     if (installationType === 'domestic') {
       // Domestic socket diversity (BS 7671 Appendix A)
@@ -178,17 +196,10 @@ export class MaximumDemandCalculator {
     }
   }
 
-  private static calculateApplianceDemand(appliances: Array<{ appliance: string; rating: number }>): number {
-    // Assume 100% demand for large appliances unless specified otherwise
-    return appliances.reduce((sum, item) => sum + item.rating, 0);
-  }
-
-  private static calculateSpecialCircuitDemand(circuits: Array<{ circuit: string; rating: number }>): number {
-    // 100% demand for special circuits
-    return circuits.reduce((sum, item) => sum + item.rating, 0);
-  }
-
-  private static generateRecommendations(maximumDemand: number, totalConnected: number, installationType: InstallationType): string[] {
+  /**
+   * Generate recommendations based on calculated demand
+   */
+  private static generateRecommendations(maximumDemand: number, installationType: InstallationType): string[] {
     const recommendations: string[] = [];
     const current = maximumDemand / 230; // Single phase current
 
@@ -206,9 +217,6 @@ export class MaximumDemandCalculator {
       recommendations.push('63A main switch should be adequate');
     }
 
-    const diversity = (maximumDemand / totalConnected) * 100;
-    recommendations.push(`Overall diversity factor: ${diversity.toFixed(1)}%`);
-
     if (installationType === 'domestic' && maximumDemand > 23000) {
       recommendations.push('Check DNO approval may be required for high demand');
     }
@@ -219,49 +227,72 @@ export class MaximumDemandCalculator {
 
 /**
  * Diversity Factor Calculator
- * Calculate diversity factors for different types of loads (BS 7671 Appendix A)
+ * Calculate diversity factors for different types of installations
+ * Reference: BS 7671 Appendix A - Diversity factors for various load types
  */
 export class DiversityFactorCalculator {
   /**
-   * Calculate diversity factors for mixed loads
+   * Calculate diversity factors for different load types
    */
   static calculate(inputs: {
-    lighting: number; // Total lighting load (W)
-    heating: number; // Total heating load (W)
-    socketOutlets: number; // Number of socket outlets
-    cookers: Array<{ rating: number; quantity: number }>; // Cooker ratings and quantities
-    waterHeating: number; // Water heating load (W)
-    airConditioning: number; // A/C load (W)
-    motorLoads: number; // Motor loads (W)
+    lighting: number;
+    heating: number;
+    socketOutlets: number;
+    cookers: Array<{ rating: number; quantity: number }>;
+    waterHeating: number;
+    airConditioning: number;
+    motorLoads: number;
     installationType: InstallationType;
   }): DiversityFactorResult {
-    const { lighting, heating, socketOutlets, cookers, waterHeating, airConditioning, motorLoads, installationType } = inputs;
+    const {
+      lighting,
+      heating,
+      socketOutlets,
+      cookers,
+      waterHeating,
+      airConditioning,
+      motorLoads,
+      installationType
+    } = inputs;
 
-    // Get diversity factors based on installation type
+    // Input validation
+    if (lighting < 0 || heating < 0 || socketOutlets < 0 || waterHeating < 0 || 
+        airConditioning < 0 || motorLoads < 0) {
+      throw new Error('All values must be non-negative');
+    }
+
+    if (!installationType) {
+      throw new Error('Installation type must be specified');
+    }
+
+    if (!Array.isArray(cookers)) {
+      throw new Error('Cookers must be an array');
+    }
+
     const factors = this.getDiversityFactors(installationType);
 
-    // Calculate demand for each load type
+    // Calculate demands
     const lightingDemand = lighting * factors.lighting;
     const heatingDemand = heating * factors.heating;
-    const socketDemand = this.calculateSocketDemand(socketOutlets, installationType);
-    const cookerDemand = this.calculateCookerDemand(cookers);
+    const socketDemand = this.calculateSocketDiversityDemand(socketOutlets, installationType);
+    const cookerDemand = this.calculateCookerDiversityDemand(cookers);
     const waterHeatingDemand = waterHeating * factors.waterHeating;
     const airConditioningDemand = airConditioning * factors.airConditioning;
     const motorDemand = motorLoads * factors.motors;
 
+    const totalDemand = lightingDemand + heatingDemand + socketDemand + 
+                       cookerDemand + waterHeatingDemand + airConditioningDemand + motorDemand;
+
     const totalConnected = lighting + heating + (socketOutlets * 100) + 
                           cookers.reduce((sum, c) => sum + (c.rating * c.quantity), 0) +
                           waterHeating + airConditioning + motorLoads;
-
-    const totalDemand = lightingDemand + heatingDemand + socketDemand + 
-                       cookerDemand + waterHeatingDemand + airConditioningDemand + motorDemand;
 
     const diversityApplied = totalConnected > 0 ? totalDemand / totalConnected : 0;
 
     const loadBreakdown = [
       { load: 'Lighting', connected: lighting, demand: lightingDemand, diversity: factors.lighting },
       { load: 'Heating', connected: heating, demand: heatingDemand, diversity: factors.heating },
-      { load: 'Socket Outlets', connected: socketOutlets * 100, demand: socketDemand, diversity: socketDemand / (socketOutlets * 100) },
+      { load: 'Socket Outlets', connected: socketOutlets * 100, demand: socketDemand, diversity: socketDemand / Math.max(socketOutlets * 100, 1) },
       { load: 'Cookers', connected: cookers.reduce((sum, c) => sum + (c.rating * c.quantity), 0), demand: cookerDemand, diversity: cookerDemand / Math.max(cookers.reduce((sum, c) => sum + (c.rating * c.quantity), 0), 1) },
       { load: 'Water Heating', connected: waterHeating, demand: waterHeatingDemand, diversity: factors.waterHeating },
       { load: 'Air Conditioning', connected: airConditioning, demand: airConditioningDemand, diversity: factors.airConditioning },
@@ -282,15 +313,19 @@ export class DiversityFactorCalculator {
     };
   }
 
+  /**
+   * Get diversity factors based on installation type
+   * Reference: BS 7671 Appendix A
+   */
   private static getDiversityFactors(installationType: InstallationType) {
     switch (installationType) {
       case 'domestic':
         return {
-          lighting: 0.9, // 90% for lighting
-          heating: 1.0, // 100% for heating
-          waterHeating: 1.0, // 100% for water heating
-          airConditioning: 0.8, // 80% for A/C
-          motors: 1.0 // 100% for motors
+          lighting: 0.9,
+          heating: 1.0,
+          waterHeating: 1.0,
+          airConditioning: 0.8,
+          motors: 1.0
         };
       case 'commercial':
         return {
@@ -302,37 +337,45 @@ export class DiversityFactorCalculator {
         };
       default: // industrial
         return {
-          lighting: 0.9,
-          heating: 1.0,
-          waterHeating: 1.0,
-          airConditioning: 1.0,
-          motors: 1.0
+          lighting: 0.7,
+          heating: 0.8,
+          waterHeating: 0.7,
+          airConditioning: 0.8,
+          motors: 0.8
         };
     }
   }
 
-  private static calculateSocketDemand(socketOutlets: number, installationType: InstallationType): number {
-    // Socket outlet diversity (BS 7671 Appendix A, Table A1)
+  /**
+   * Calculate socket outlet diversity demand
+   * Reference: BS 7671 Appendix A - Socket outlet diversity factors
+   */
+  private static calculateSocketDiversityDemand(socketOutlets: number, installationType: InstallationType): number {
     if (installationType === 'domestic') {
-      if (socketOutlets <= 10) return socketOutlets * 100; // 100W per socket for first 10
-      if (socketOutlets <= 20) return 1000 + ((socketOutlets - 10) * 50); // 50W for next 10
-      return 1500 + ((socketOutlets - 20) * 25); // 25W for remaining
-    } else {
-      // Commercial/industrial - higher diversity
-      return socketOutlets * 80; // 80W per socket average
+      if (socketOutlets <= 10) {
+        return socketOutlets * 100;
+      } else if (socketOutlets <= 20) {
+        return 1000 + (socketOutlets - 10) * 50;
+      } else {
+        return 1500 + (socketOutlets - 20) * 25;
+      }
     }
+    return socketOutlets * 80; // Commercial/industrial
   }
 
-  private static calculateCookerDemand(cookers: Array<{ rating: number; quantity: number }>): number {
-    let totalRating = 0;
+  /**
+   * Calculate cooker diversity demand
+   * Reference: BS 7671 Appendix A - Cooking appliance diversity
+   */
+  private static calculateCookerDiversityDemand(cookers: Array<{ rating: number; quantity: number }>): number {
+    const totalCookerLoad = cookers.reduce((sum, c) => sum + (c.rating * c.quantity), 0);
     
-    cookers.forEach(cooker => {
-      totalRating += cooker.rating * cooker.quantity;
-    });
-
-    // Cooker diversity (BS 7671 Appendix A)
-    if (totalRating <= 10000) return totalRating * 1.0; // 100% for first 10kW
-    if (totalRating <= 60000) return 10000 + ((totalRating - 10000) * 0.5); // 50% for next 50kW
-    return 35000 + ((totalRating - 60000) * 0.25); // 25% for remainder
+    if (totalCookerLoad <= 10000) {
+      return totalCookerLoad;
+    } else if (totalCookerLoad <= 60000) {
+      return 10000 + (totalCookerLoad - 10000) * 0.5;
+    } else {
+      return 10000 + 25000 + (totalCookerLoad - 60000) * 0.25;
+    }
   }
 }

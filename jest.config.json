@@ -5,7 +5,7 @@
     "**/__tests__/**/*.test.ts",
     "**/?(*.)+(spec|test).ts"
   ],
-  "moduleNameMapping": {
+  "moduleNameMapper": {
     "^@/(.*)$": "<rootDir>/src/$1"
   },
   "collectCoverageFrom": [

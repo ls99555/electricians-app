@@ -215,6 +215,23 @@ export class EmergencyLightingCalculator {
   }): EmergencyLightingResult {
     const { roomArea, roomType, ceilingHeight, escapeRouteWidth, occupancy } = inputs;
 
+    // Input validation - BS 5266 compliance
+    if (roomArea <= 0) {
+      throw new Error('Room area must be positive');
+    }
+    
+    if (ceilingHeight <= 0) {
+      throw new Error('Ceiling height must be positive');
+    }
+    
+    if (occupancy < 0) {
+      throw new Error('Occupancy cannot be negative');
+    }
+    
+    if (!roomType) {
+      throw new Error('Room type must be specified for BS 5266 compliance');
+    }
+
     try {
       // Get requirements based on room type (BS 5266)
       const requirements = this.getEmergencyLightingRequirements(roomType);
