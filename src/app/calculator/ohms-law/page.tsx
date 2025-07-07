@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Calculator, RotateCcw, Info } from 'lucide-react';
-import { OhmLawCalculator, type OhmLawResult } from '@/lib/calculations/electrical';
+import { OhmLawCalculator, type OhmLawResult } from '@/lib/calculations';
 import styles from './ohms-law.module.scss';
 
 export default function OhmsLawPage() {
