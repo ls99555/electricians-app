@@ -1,0 +1,295 @@
+@import '../../../styles/mixins.scss';
+
+.container {
+  min-height: 100vh;
+  background-color: var(--color-bg-secondary);
+}
+
+.header {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: var(--color-text-inverse);
+  padding: var(--spacing-xl) 0;
+  
+  @include mobile-only {
+    padding: var(--spacing-lg) 0;
+  }
+}
+
+.headerContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+  text-align: center;
+}
+
+.title {
+  @include flex-center;
+  gap: var(--spacing-md);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-md);
+  
+  @include mobile-only {
+    font-size: var(--font-size-2xl);
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+}
+
+.icon {
+  width: 2rem;
+  height: 2rem;
+  color: var(--color-secondary);
+}
+
+.subtitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  opacity: 0.9;
+}
+
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-2xl) var(--spacing-md);
+  
+  @include mobile-only {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+}
+
+.calculatorGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-2xl);
+  margin-bottom: var(--spacing-2xl);
+  
+  @include mobile-only {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+  }
+}
+
+.inputSection,
+.resultSection {
+  @include card;
+  
+  h2 {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: var(--border-width-thin) solid var(--color-border-light);
+  }
+}
+
+.instruction {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-xl);
+  font-size: var(--font-size-sm);
+}
+
+.inputGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  
+  @include mobile-only {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+}
+
+.inputGroup {
+  position: relative;
+  
+  label {
+    display: block;
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+  }
+}
+
+.input {
+  @include input-base;
+  padding-right: 3rem; // Space for unit
+  
+  &:invalid {
+    border-color: var(--color-error);
+  }
+}
+
+.unit {
+  position: absolute;
+  right: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  pointer-events: none;
+  margin-top: 1rem; // Account for label height
+}
+
+.buttonGroup {
+  @include flex-between;
+  gap: var(--spacing-md);
+  
+  @include mobile-only {
+    flex-direction: column;
+  }
+}
+
+.calculateButton {
+  @include button-primary;
+  flex: 1;
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: var(--font-size-base);
+  gap: var(--spacing-sm);
+  
+  @include mobile-only {
+    order: 1;
+  }
+}
+
+.resetButton {
+  @include button-secondary;
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: var(--font-size-base);
+  gap: var(--spacing-sm);
+  
+  @include mobile-only {
+    order: 2;
+  }
+}
+
+.error {
+  @include flex-center;
+  gap: var(--spacing-sm);
+  background-color: #fef2f2;
+  border: var(--border-width-thin) solid var(--color-error);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-md);
+  color: var(--color-error);
+  margin-top: var(--spacing-lg);
+  font-size: var(--font-size-sm);
+  
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.resultItem {
+  @include flex-between;
+  padding: var(--spacing-md);
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--border-radius-md);
+  border: var(--border-width-thin) solid var(--color-border-light);
+}
+
+.resultLabel {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.resultValue {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  font-size: var(--font-size-lg);
+  font-family: var(--font-family-mono);
+}
+
+.noResults {
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  padding: var(--spacing-xl);
+}
+
+.infoSection {
+  @include card;
+  
+  h2 {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+  }
+}
+
+.formulaGrid {
+  @include grid-responsive(200px);
+  margin-bottom: var(--spacing-xl);
+}
+
+.formula {
+  text-align: center;
+  padding: var(--spacing-lg);
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--border-radius-lg);
+  border: var(--border-width-thin) solid var(--color-border-light);
+  
+  h3 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-md);
+  }
+  
+  p {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-xs);
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.disclaimer {
+  @include flex-center;
+  gap: var(--spacing-md);
+  background-color: #fff9e6;
+  border: var(--border-width-thin) solid var(--color-warning);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  
+  @include mobile-only {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+.disclaimerIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--color-warning);
+  flex-shrink: 0;
+}
+
+.disclaimer {
+  p {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-relaxed);
+    
+    strong {
+      font-weight: var(--font-weight-semibold);
+    }
+  }
+}

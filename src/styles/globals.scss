@@ -1,0 +1,157 @@
+// Import SCSS variables
+@import './variables.scss';
+
+// CSS Custom Properties (CSS Variables) for SparkyTools
+:root {
+  /* Colors */
+  --color-primary: #{$color-primary};
+  --color-primary-light: #{$color-primary-light};
+  --color-primary-dark: #{$color-primary-dark};
+  --color-secondary: #{$color-secondary};
+  --color-secondary-light: #{$color-secondary-light};
+  --color-secondary-dark: #{$color-secondary-dark};
+  
+  /* UI Colors */
+  --color-success: #{$color-success};
+  --color-warning: #{$color-warning};
+  --color-error: #{$color-error};
+  --color-info: #{$color-info};
+  
+  /* Background Colors */
+  --color-bg-primary: #{$color-bg-primary};
+  --color-bg-secondary: #{$color-bg-secondary};
+  --color-bg-tertiary: #{$color-bg-tertiary};
+  --color-bg-dark: #{$color-bg-dark};
+  
+  /* Text Colors */
+  --color-text-primary: #{$color-text-primary};
+  --color-text-secondary: #{$color-text-secondary};
+  --color-text-tertiary: #{$color-text-tertiary};
+  --color-text-inverse: #{$color-text-inverse};
+  
+  /* Border Colors */
+  --color-border-light: #{$color-border-light};
+  --color-border-medium: #{$color-border-medium};
+  --color-border-dark: #{$color-border-dark};
+  
+  /* Spacing */
+  --spacing-xs: #{$spacing-xs};
+  --spacing-sm: #{$spacing-sm};
+  --spacing-md: #{$spacing-md};
+  --spacing-lg: #{$spacing-lg};
+  --spacing-xl: #{$spacing-xl};
+  --spacing-2xl: #{$spacing-2xl};
+  --spacing-3xl: #{$spacing-3xl};
+  
+  /* Typography */
+  --font-family-primary: #{$font-family-primary};
+  --font-family-mono: #{$font-family-mono};
+  
+  --font-size-xs: #{$font-size-xs};
+  --font-size-sm: #{$font-size-sm};
+  --font-size-base: #{$font-size-base};
+  --font-size-lg: #{$font-size-lg};
+  --font-size-xl: #{$font-size-xl};
+  --font-size-2xl: #{$font-size-2xl};
+  --font-size-3xl: #{$font-size-3xl};
+  --font-size-4xl: #{$font-size-4xl};
+  
+  --font-weight-normal: #{$font-weight-normal};
+  --font-weight-medium: #{$font-weight-medium};
+  --font-weight-semibold: #{$font-weight-semibold};
+  --font-weight-bold: #{$font-weight-bold};
+  
+  --line-height-tight: #{$line-height-tight};
+  --line-height-base: #{$line-height-base};
+  --line-height-relaxed: #{$line-height-relaxed};
+  
+  /* Borders & Radius */
+  --border-radius-sm: #{$border-radius-sm};
+  --border-radius-md: #{$border-radius-md};
+  --border-radius-lg: #{$border-radius-lg};
+  --border-radius-xl: #{$border-radius-xl};
+  --border-radius-2xl: #{$border-radius-2xl};
+  --border-radius-full: #{$border-radius-full};
+  
+  --border-width-thin: #{$border-width-thin};
+  --border-width-medium: #{$border-width-medium};
+  --border-width-thick: #{$border-width-thick};
+  
+  /* Shadows */
+  --shadow-sm: #{$shadow-sm};
+  --shadow-md: #{$shadow-md};
+  --shadow-lg: #{$shadow-lg};
+  --shadow-xl: #{$shadow-xl};
+  
+  /* Z-Index */
+  --z-index-dropdown: #{$z-index-dropdown};
+  --z-index-modal: #{$z-index-modal};
+  --z-index-toast: #{$z-index-toast};
+  --z-index-tooltip: #{$z-index-tooltip};
+  
+  /* Transitions */
+  --transition-fast: #{$transition-fast};
+  --transition-base: #{$transition-base};
+  --transition-slow: #{$transition-slow};
+  
+  /* Breakpoints (for reference in SCSS) */
+  --breakpoint-sm: #{$breakpoint-sm};
+  --breakpoint-md: #{$breakpoint-md};
+  --breakpoint-lg: #{$breakpoint-lg};
+  --breakpoint-xl: #{$breakpoint-xl};
+  --breakpoint-2xl: #{$breakpoint-2xl};
+}
+
+/* Dark theme variables */
+[data-theme="dark"] {
+  --color-bg-primary: #{$dark-bg-primary};
+  --color-bg-secondary: #{$dark-bg-secondary};
+  --color-bg-tertiary: #{$dark-bg-tertiary};
+  
+  --color-text-primary: #{$dark-text-primary};
+  --color-text-secondary: #{$dark-text-secondary};
+  --color-text-tertiary: #{$dark-text-tertiary};
+  
+  --color-border-light: #{$dark-border-light};
+  --color-border-medium: #{$dark-border-medium};
+  --color-border-dark: #{$dark-border-dark};
+}
+
+/* Base reset and typography */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Utility classes */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
