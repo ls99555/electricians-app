@@ -203,30 +203,40 @@ export interface EVChargingResult {
 }
 
 export interface SolarPVResult {
-  requiredArraySize: number;
-  numberOfPanels: number;
-  roofAreaRequired: number;
-  estimatedAnnualGeneration: number;
-  inverterSizing: number;
-  dcCableSizing: string;
-  earthingRequirements: string[];
-  regulations: string[];
+  systemCapacity: number; // Wp
+  dcCurrent: number; // A
+  dcPowerOutput: number; // W
+  acPowerOutput: number; // W
+  annualYield: number; // kWh
+  tempDerating: number;
+  irradianceFactor: number;
+  inverterEfficiency: number;
+  isG98Compliant: boolean;
+  connectionType: string;
+  stringsRequired: number;
+  maxStringLength: number;
+  regulation: string;
 }
 
 export interface BatteryStorageResult {
-  requiredCapacity: number;
-  batteryAmpHours: number;
-  numberOfBatteries: number;
-  inverterSize: number;
-  chargingCurrent: number;
-  cableSizing: string;
-  ventilationRequirements: string[];
-  safetyRequirements: string[];
-  economicAnalysis: {
-    cycleLife: number;
-    costPerCycle: number;
-    paybackEstimate: string;
-  };
+  capacity: number; // kWh
+  usableCapacity: number; // kWh
+  voltage: number; // V
+  maxChargeCurrent: number; // A
+  maxDischargeCurrent: number; // A
+  chargeRate: number; // C-rate
+  dischargeRate: number; // C-rate
+  chargeDuration: number; // hours
+  dischargeDuration: number; // hours
+  efficiency: number;
+  dod: number; // Depth of discharge
+  annualThroughput: number; // kWh/year
+  requiresBMS: boolean;
+  requiresFireSuppression: boolean;
+  requiresVentilation: boolean;
+  requiresG98: boolean;
+  connectionType: string;
+  regulation: string;
 }
 
 // Common input types

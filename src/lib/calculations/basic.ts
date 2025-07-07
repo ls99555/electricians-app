@@ -159,7 +159,9 @@ export class VoltageDropCalculator {
     
     if (current <= 0) throw new Error('Current must be positive');
     if (length <= 0) throw new Error('Length must be positive');
+    if (length > 1000) throw new Error('Cable length exceeds practical limits');
     if (cableSize <= 0) throw new Error('Cable size must be positive');
+    if (cableSize < 1.0) throw new Error('Invalid cable size - minimum 1.0mm²');
     if (![1, 3].includes(phases)) throw new Error('Phases must be 1 or 3');
     if (powerFactor < 0.1 || powerFactor > 1.0) throw new Error('Power factor must be between 0.1 and 1.0');
   }

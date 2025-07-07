@@ -27,21 +27,32 @@ export {
   ConduitFillCalculator
 } from './cable-protection';
 
-// Re-export remaining calculators from the original file (temporary)
-// These will be moved to separate modules in future iterations
+// Export renewable energy calculations
+export {
+  SolarPVCalculator,
+  BatteryStorageCalculator,
+  EVChargingCalculator
+} from './renewable-energy';
+
+// Export lighting calculations
 export {
   IlluminanceCalculator,
-  EVChargingCalculator,
+  EmergencyLightingCalculator
+} from './lighting';
+
+// Export safety and testing calculations
+export {
   LoopImpedanceCalculator,
   RCDSelectionCalculator,
   EarthElectrodeResistanceCalculator,
+  FaultCurrentCalculator
+} from './safety-testing';
+
+// Export power systems calculations
+export {
   ThreePhaseCalculator,
-  PowerFactorCalculator,
-  FaultCurrentCalculator,
-  SolarPVCalculator,
-  BatteryStorageCalculator,
-  EmergencyLightingCalculator
-} from './electrical';
+  PowerFactorCalculator
+} from './power-systems';
 
 // Utility functions
 export const ElectricalUtils = {

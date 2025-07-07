@@ -1,5 +1,30 @@
 # SparkyTools - Development TODO List
 
+## ⚠️ CRITICAL REQUIREMENTS - UK ELECTRICAL REGULATIONS COMPLIANCE
+
+### 🇬🇧 MANDATORY UK STANDARDS COMPLIANCE
+- **ALL calculations MUST reference UK electrical regulations (BS 7671)**
+- **ALL calculations MUST include regulation section references in comments**
+- **ALL calculations MUST include proper disclaimers**
+- **ALL calculations MUST be based on current 18th Edition BS 7671**
+- **ALL calculations MUST reference applicable British Standards (BS EN)**
+- **NEVER copy regulation text directly - always paraphrase and reference**
+
+### 🧪 MANDATORY TESTING REQUIREMENTS  
+- **ALL calculation functions MUST have comprehensive unit tests**
+- **ALL calculations MUST be tested with realistic real-world values**
+- **ALL edge cases and boundary conditions MUST be tested**
+- **ALL error handling and input validation MUST be tested**
+- **ALL calculations MUST be verified against known reference values**
+- **ALL tests MUST validate regulatory compliance**
+
+### ⚖️ LEGAL COMPLIANCE REQUIREMENTS
+- **ALL electrical calculations MUST include safety disclaimers**
+- **ALL calculations MUST specify "guidance only" status**
+- **ALL calculations MUST recommend qualified electrician consultation**
+- **ALL calculations MUST reference professional liability limitations**
+- **ALL calculations MUST comply with Building Regulations Part P**
+
 ## Project Setup ✅
 - [x] Initialize Next.js project with TypeScript
 - [x] Configure SCSS modules and CSS variables
@@ -12,6 +37,12 @@
 - [x] Global CSS variables and SCSS mixins
 - [x] Mobile-responsive design system
 - [x] Basic electrical calculations library
+- [x] **COMPLETED: Modular calculation structure (types, basic, load-demand, cable-protection, lighting, safety-testing, power-systems, renewable-energy)**
+- [x] **COMPLETED: All calculations moved from electrical.ts to modular files**
+- [x] **COMPLETED: All calculations reference UK regulations (BS 7671)**
+- [x] **COMPLETED: Jest testing framework setup with comprehensive unit tests**
+- [x] **COMPLETED: Basic calculations fully tested (26 passing tests)**
+- [ ] **PRIORITY: Unit tests for remaining calculation modules**
 - [ ] Service worker for offline functionality
 - [ ] Error boundary components
 - [ ] Loading states and skeletons
@@ -412,14 +443,19 @@
 - [ ] CDN setup for static assets
 
 ## Testing & Quality Assurance 🧪
-- [ ] Unit tests for calculation functions
+- [ ] Unit tests for calculation functions (MANDATORY for each calculation)
+- [ ] UK regulation compliance testing (BS 7671 verification)
 - [ ] Integration tests for UI components
 - [ ] E2E tests for critical user flows
+- [ ] Calculation accuracy validation against known values
+- [ ] Edge case and boundary condition testing
+- [ ] Input validation and error handling tests
 - [ ] Accessibility testing (WCAG compliance)
 - [ ] Cross-browser testing
 - [ ] Mobile device testing
 - [ ] Performance testing
 - [ ] Security testing
+- [ ] Regulatory compliance verification tests
 
 ## Deployment & DevOps 🚀
 - [ ] GitHub Actions CI/CD pipeline
