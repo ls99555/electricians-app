@@ -44,7 +44,7 @@ export {
 export {
   LoopImpedanceCalculator,
   RCDSelectionCalculator,
-  EarthElectrodeResistanceCalculator,
+  EarthElectrodeCalculator,
   FaultCurrentCalculator
 } from './safety-testing';
 

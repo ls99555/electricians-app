@@ -142,6 +142,7 @@ export interface EarthElectrodeResult {
   improvementSuggestions: string[];
   seasonalVariation: string;
   testConditions: string;
+  regulation: string;
 }
 
 export interface FaultCurrentResult {
@@ -150,6 +151,11 @@ export interface FaultCurrentResult {
   peakFaultCurrent: number;
   faultImpedance: number;
   arcingFaultCurrent?: number;
+  breakingCapacity?: number;
+  isWithinLimits?: boolean;
+  faultType?: string;
+  regulation?: string;
+  recommendations?: string[];
   protectionRequirements: {
     minimumBreakingCapacity: number;
     maximumDisconnectionTime: number;
@@ -264,7 +270,7 @@ export type InstallationType = 'domestic' | 'commercial' | 'industrial';
 export type EarthingSystem = 'TN-S' | 'TN-C-S' | 'TT' | 'IT';
 export type CircuitType = 'lighting' | 'power' | 'motor' | 'heating' | 'special';
 export type BatteryType = 'lead_acid' | 'lithium_ion' | 'lithium_phosphate';
-export type ElectrodeType = 'rod' | 'plate' | 'strip' | 'foundation';
+export type ElectrodeType = 'rod' | 'plate' | 'strip' | 'tape' | 'foundation';
 
 // Common constants
 export const ELECTRICAL_CONSTANTS = {
