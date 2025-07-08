@@ -1,7 +1,26 @@
 /**
  * Load and Demand Calculations
  * Maximum demand, diversity factors, and load assessment calculations
- * Based on BS 7671 18th Edition Appendix A - Current-carrying capacity and voltage drop for cables
+ * 
+ * Based on:
+ * - BS 7671:2018+A2:2022 Appendix A - Current-carrying capacity and voltage drop for cables
+ * - IET Guidance Note 1 - Selection & Erection of Equipment  
+ * - IET On-Site Guide (18th Edition) - Diversity factors for installations
+ * - BS 7671 Section 311 - Assessment of general characteristics
+ * 
+ * UK Diversity Factors (BS 7671 Appendix A Table A1):
+ * - Lighting: 90% diversity for domestic, 75% for commercial
+ * - Socket outlets: 100% for first 10A, 40% for remainder (domestic)
+ * - Cooking appliances: Variable diversity based on connected load
+ * - Water heating: 100% for individual installations
+ * - Space heating: Variable based on control systems
+ * 
+ * IMPORTANT DISCLAIMERS:
+ * - These calculations provide guidance only and do not constitute professional advice
+ * - All electrical work must be carried out by competent persons
+ * - Load assessments must be verified by qualified electrical engineers
+ * - Diversity factors may vary - always check with local regulations
+ * - Professional indemnity insurance recommended for all electrical work
  */
 
 import type { 

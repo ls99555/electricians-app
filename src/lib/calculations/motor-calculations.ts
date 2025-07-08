@@ -1,7 +1,34 @@
 /**
  * Motor Load and Control Calculations
  * Motor starting current, full load current, protection, and VFD calculations
- * Based on BS 7671 and IEC motor standards
+ * 
+ * Based on:
+ * - BS 7671:2018+A2:2022 Section 552 - Rotating machines
+ * - IEC 60034-1 - Rating and performance of rotating electrical machines
+ * - IEC 60034-12 - Starting performance of three-phase cage induction motors
+ * - BS EN 60204-1 - Safety of machinery - Electrical equipment of machines
+ * - IET Guidance Note 1 - Selection & Erection of Equipment
+ * - BS EN 61800 - Adjustable speed electrical power drive systems
+ * 
+ * UK Motor Installation Requirements:
+ * - Motor protection per BS 7671 Section 552.1
+ * - Starting current limitations (BS 7671 552.1.2)
+ * - Emergency stopping requirements (BS EN 60204-1)
+ * - Motor cable sizing considering starting current
+ * - Protection against overload and short circuit
+ * 
+ * Motor Starting Methods (BS 7671 552.1.2):
+ * - Direct-on-line: 6-8 times full load current
+ * - Star-delta: 2-3 times full load current
+ * - Soft start: 2-4 times full load current
+ * - VFD: 1.5-2 times full load current
+ * 
+ * IMPORTANT DISCLAIMERS:
+ * - These calculations provide guidance only and do not constitute professional advice
+ * - All electrical work must be carried out by competent persons
+ * - Motor installations must comply with machinery safety standards
+ * - Consider supply authority starting current limitations
+ * - Professional indemnity insurance recommended for all electrical work
  */
 
 import type { 

@@ -1,6 +1,29 @@
 /**
  * Cable and Protection Calculations
  * Cable derating, conduit fill, and protective device selection
+ * 
+ * Based on:
+ * - BS 7671:2018+A2:2022 (18th Edition) - Requirements for Electrical Installations
+ * - BS 7671 Appendix 4 - Current-carrying capacity and voltage drop
+ * - IET Guidance Note 1 - Selection & Erection of Equipment
+ * - IET Guidance Note 6 - Protection Against Overcurrent
+ * - BS EN 60898 - Circuit breakers for over-current protection
+ * - BS EN 61009 - Residual current operated circuit breakers
+ * 
+ * Cable Installation Methods (BS 7671 Table 4A2):
+ * - Method A: Enclosed in conduit in thermally insulating wall
+ * - Method B: Enclosed in conduit on a wall or in trunking
+ * - Method C: Clipped direct to non-metallic surface
+ * - Method D: In conduit in masonry wall
+ * - Method E: In free air
+ * - Method F: Underground in ducts
+ * 
+ * IMPORTANT DISCLAIMERS:
+ * - These calculations provide guidance only and do not constitute professional advice
+ * - All electrical work must be carried out by competent persons
+ * - Cable selections must be verified by qualified electrical engineers
+ * - Always use manufacturer's data for final cable selection
+ * - Professional indemnity insurance recommended for all electrical work
  */
 
 import type { 

@@ -52,7 +52,7 @@ export default function OhmsLawPage() {
             Ohm's Law Calculator
           </h1>
           <p className={styles.subtitle}>
-            Calculate voltage, current, resistance, or power using Ohm's Law
+            Calculate voltage, current, resistance, or power using Ohm's Law (BS 7671 compliant)
           </p>
         </div>
       </header>
@@ -172,6 +172,32 @@ export default function OhmsLawPage() {
         </div>
 
         <div className={styles.infoSection}>
+          <h2>UK Electrical Standards Reference</h2>
+          <div className={styles.standardsGrid}>
+            <div className={styles.standard}>
+              <h3>BS 7671:2018+A2:2022</h3>
+              <p>Requirements for Electrical Installations (18th Edition)</p>
+              <p>Fundamental electrical safety requirements</p>
+            </div>
+            <div className={styles.standard}>
+              <h3>UK Standard Voltages</h3>
+              <p>Single-phase: 230V ±10% (BS EN 50160)</p>
+              <p>Three-phase: 400V ±10% (BS EN 50160)</p>
+            </div>
+            <div className={styles.standard}>
+              <h3>Building Regulations Part P</h3>
+              <p>Electrical Safety in dwellings</p>
+              <p>Competent person requirements</p>
+            </div>
+            <div className={styles.standard}>
+              <h3>IET Guidance Notes</h3>
+              <p>Practical application of BS 7671</p>
+              <p>Industry best practices</p>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.infoSection}>
           <h2>Ohm's Law Formulas</h2>
           <div className={styles.formulaGrid}>
             <div className={styles.formula}>
@@ -203,7 +229,16 @@ export default function OhmsLawPage() {
           <div className={styles.disclaimer}>
             <Info className={styles.disclaimerIcon} />
             <div>
-              <p><strong>Disclaimer:</strong> These calculations are for guidance only and reference electrical principles. All electrical work must be carried out by qualified electricians in accordance with current UK regulations (BS 7671).</p>
+              <p><strong>UK Electrical Regulations Compliance:</strong></p>
+              <ul>
+                <li>These calculations reference BS 7671:2018+A2:2022 (18th Edition) electrical principles</li>
+                <li>All electrical work must be carried out by competent persons per Building Regulations Part P</li>
+                <li>Calculations must be verified by qualified electrical engineers</li>
+                <li>Consider voltage drop, cable sizing, and protection requirements for final installations</li>
+                <li>Standard UK voltages: 230V single-phase, 400V three-phase (BS EN 50160)</li>
+                <li>Professional indemnity insurance recommended for all electrical work</li>
+              </ul>
+              <p><strong>Safety Warning:</strong> These calculations are for guidance only. Electrical installations must comply with current UK building regulations and be certified by qualified electricians.</p>
             </div>
           </div>
         </div>

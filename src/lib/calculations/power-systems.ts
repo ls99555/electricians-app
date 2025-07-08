@@ -1,7 +1,27 @@
 /**
  * Power Systems Calculations
  * Three-phase systems, power factor correction, and power analysis
- * Based on UK electrical standards and BS 7671
+ * 
+ * Based on:
+ * - BS 7671:2018+A2:2022 (18th Edition) - Requirements for Electrical Installations
+ * - BS EN 50160 - Voltage characteristics of electricity supplied by public distribution networks
+ * - BS EN 61000 - Electromagnetic compatibility standards
+ * - IET Guidance Note 1 - Selection & Erection of Equipment
+ * - IEEE 519 - Harmonic Control in Electrical Power Systems
+ * 
+ * UK Three-Phase System Standards:
+ * - Standard three-phase voltage: 400V (BS EN 50160)
+ * - Standard single-phase voltage: 230V (BS EN 50160)
+ * - Frequency: 50Hz ±1% (BS EN 50160)
+ * - Voltage tolerance: ±10% (BS EN 50160)
+ * - Power factor requirements for commercial installations
+ * 
+ * IMPORTANT DISCLAIMERS:
+ * - These calculations provide guidance only and do not constitute professional advice
+ * - All electrical work must be carried out by competent persons
+ * - Power system calculations must be verified by qualified electrical engineers
+ * - Consider harmonics and power quality in commercial installations
+ * - Professional indemnity insurance recommended for all electrical work
  */
 
 import type { ThreePhaseResult, PowerFactorResult } from './types';

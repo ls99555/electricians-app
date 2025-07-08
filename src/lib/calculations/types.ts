@@ -434,3 +434,71 @@ export const ELECTRICAL_CONSTANTS = {
   STANDARD_CABLE_SIZES: [1.0, 1.5, 2.5, 4.0, 6.0, 10.0, 16.0, 25.0, 35.0, 50.0, 70.0, 95.0, 120.0, 150.0, 185.0, 240.0, 300.0],
   STANDARD_MCB_RATINGS: [6, 10, 16, 20, 25, 32, 40, 50, 63, 80, 100, 125]
 } as const;
+
+// Building Regulations & Standards result types
+export interface PartPComplianceResult {
+  workType: string;
+  location: string;
+  notificationRequired: boolean;
+  certificationRequired: string;
+  competentPersonEligible: boolean;
+  complianceCost: {
+    min: number;
+    max: number;
+    description: string;
+  };
+  compliancePathway: string[];
+  timeframe: string;
+  recommendations: string[];
+  regulation: string;
+}
+
+export interface BuildingRegulationResult {
+  buildingType: string;
+  floorArea: number;
+  totalConnectedLoad: number;
+  maximumDemand: number;
+  serviceCapacity: number;
+  minimumCircuits: number;
+  loadBreakdown: {
+    base: number;
+    heating: number;
+    hotWater: number;
+    cooking: number;
+    evCharging: number;
+  };
+  recommendations: string[];
+  regulation: string;
+}
+
+export interface EnergyPerformanceResult {
+  buildingType: string;
+  floorArea: number;
+  energyUseIntensity: number;
+  netEnergyConsumption: number;
+  renewableContribution: number;
+  carbonEmissions: number;
+  energyRating: string;
+  potentialRating: string;
+  costSavings: {
+    annualSavings: number;
+    investmentRequired: number;
+    paybackYears: number;
+  };
+  recommendations: string[];
+  regulation: string;
+}
+
+export interface MinimumCircuitResult {
+  minimumCircuits: number;
+  circuitBreakdown: {
+    lighting: number;
+    sockets: number;
+    cooking: number;
+    heating: number;
+    special: number;
+    spare: number;
+  };
+  recommendations: string[];
+  regulation: string;
+}

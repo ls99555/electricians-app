@@ -76,6 +76,13 @@ export {
   CircuitCapacityCalculator
 } from './capacity-calculations';
 
+// Export building regulations calculations
+export {
+  PartPComplianceCalculator,
+  BuildingRegulationCalculator,
+  EnergyPerformanceCalculator
+} from './building-regulations';
+
 // Utility functions
 export const ElectricalUtils = {
   /**

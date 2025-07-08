@@ -37,12 +37,14 @@
 - [x] Global CSS variables and SCSS mixins
 - [x] Mobile-responsive design system
 - [x] Basic electrical calculations library
-- [x] **COMPLETED: Modular calculation structure (types, basic, load-demand, cable-protection, lighting, safety-testing, power-systems, renewable-energy)**
+- [x] **COMPLETED: Modular calculation structure (types, basic, load-demand, cable-protection, lighting, safety-testing, power-systems, renewable-energy, motor-calculations, specialized-applications, capacity-calculations)**
 - [x] **COMPLETED: All calculations moved from electrical.ts to modular files**
 - [x] **COMPLETED: All calculations reference UK regulations (BS 7671)**
 - [x] **COMPLETED: Jest testing framework setup with comprehensive unit tests**
-- [x] **COMPLETED: Basic calculations fully tested (26 passing tests)**
-- [ ] **PRIORITY: Unit tests for remaining calculation modules**
+- [x] **COMPLETED: Basic calculations fully tested (138 passing tests total)**
+- [x] **COMPLETED: Motor calculations with VFD sizing and efficiency analysis**
+- [x] **COMPLETED: Specialized applications (Fire Alarm, CCTV, Data Center)**
+- [x] **COMPLETED: Capacity calculations (Service Head, Distribution Board, Transformer, Circuit Capacity)**
 - [ ] Service worker for offline functionality
 - [ ] Error boundary components
 - [ ] Loading states and skeletons
@@ -108,14 +110,14 @@
 - [ ] Lightning Protection Calculator
 
 ### Motor & Industrial Calculations
-- [ ] Motor Starting Current Calculator
-- [ ] Motor Full Load Current
-- [ ] Motor Cable Sizing
-- [ ] Star-Delta Starting Calculator
-- [ ] Variable Frequency Drive (VFD) Sizing
-- [ ] Motor Efficiency Calculator
-- [ ] Power Factor Correction for Motors
-- [ ] Motor Protection Settings
+- [x] Motor Starting Current Calculator
+- [x] Motor Full Load Current
+- [x] Motor Cable Sizing
+- [x] Star-Delta Starting Calculator
+- [x] Variable Frequency Drive (VFD) Sizing
+- [x] Motor Efficiency Calculator
+- [x] Power Factor Correction for Motors
+- [x] Motor Protection Settings
 
 ### EV Charging Calculations 🚗⚡
 - [x] EV Charger Load Calculator
@@ -152,13 +154,13 @@
 - [ ] Carbon Footprint Reduction Calculator
 
 ### Maximum Capacity Calculations ⚡
-- [ ] Service Head Maximum Demand
-- [ ] Distribution Board Load Calculation
-- [ ] Sub-Main Cable Capacity
-- [ ] Ring Circuit Maximum Load
-- [ ] Radial Circuit Capacity
-- [ ] Three Phase Load Balancing
-- [ ] Transformer Capacity Calculator
+- [x] Service Head Maximum Demand
+- [x] Distribution Board Load Calculation
+- [x] Sub-Main Cable Capacity
+- [x] Ring Circuit Maximum Load
+- [x] Radial Circuit Capacity
+- [x] Three Phase Load Balancing
+- [x] Transformer Capacity Calculator
 - [ ] Switchgear Rating Calculator
 - [ ] Busbar Current Rating
 
@@ -185,9 +187,9 @@
 - [x] Power Factor Correction Sizing
 
 ### Specialized Applications
-- [ ] Fire Alarm System Calculations
-- [ ] CCTV Power Requirements
-- [ ] Data Center Power Calculations
+- [x] Fire Alarm System Calculations
+- [x] CCTV Power Requirements
+- [x] Data Center Power Calculations
 - [ ] Swimming Pool & Spa Calculations
 - [ ] Caravan & Marina Supply
 - [ ] Agricultural Installation Calculations

@@ -1,7 +1,29 @@
 /**
  * Safety and Testing Calculations
  * Loop impedance, RCD selection, earth electrode, and fault current calculations
- * Based on BS 7671 safety requirements
+ * 
+ * Based on:
+ * - BS 7671:2018+A2:2022 (18th Edition) - Requirements for Electrical Installations
+ * - BS 7671 Chapter 41 - Protection against electric shock
+ * - BS 7671 Chapter 54 - Earthing arrangements and protective conductors
+ * - BS 7671 Appendix 3 - Time/current characteristics of overcurrent devices
+ * - IET Guidance Note 3 - Inspection & Testing
+ * - IET Code of Practice for In-service Inspection and Testing
+ * - BS EN 60898 - Circuit breakers for over-current protection
+ * - BS EN 61009 - Residual current operated circuit breakers
+ * 
+ * UK Electrical Safety Requirements:
+ * - Maximum disconnection times (BS 7671 Table 41.1)
+ * - Earth fault loop impedance limits (BS 7671 Appendix 3)
+ * - RCD operating characteristics (BS EN 61008/61009)
+ * - Earth electrode resistance limits (BS 7671 Section 542)
+ * 
+ * IMPORTANT DISCLAIMERS:
+ * - These calculations provide guidance only and do not constitute professional advice
+ * - All electrical work must be carried out by competent persons
+ * - Safety calculations must be verified by qualified electrical engineers
+ * - Testing must be performed with calibrated instruments
+ * - Professional indemnity insurance recommended for all electrical work
  */
 
 import type { 

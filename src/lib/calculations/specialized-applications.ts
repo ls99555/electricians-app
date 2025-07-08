@@ -1,7 +1,33 @@
 /**
  * Specialized Applications Calculations
  * Fire Alarm, CCTV, Data Center, and other specialized electrical systems
- * Based on BS 7671 and relevant British Standards
+ * 
+ * Based on:
+ * - BS 5839-1:2017 - Fire detection and fire alarm systems for buildings
+ * - BS 7671:2018+A2:2022 Section 560 - Safety services
+ * - BS EN 54 series - Fire detection and fire alarm systems
+ * - BS 8593:2017 - Code of practice for the design of closed circuit television systems
+ * - BS EN 50174 - Information technology - Cabling installation
+ * - IET Code of Practice for Data Centres
+ * 
+ * UK Requirements for Specialized Systems:
+ * - Fire alarm systems must comply with BS 5839-1
+ * - Emergency lighting per BS 5266-1
+ * - Security systems per BS 8591
+ * - Data center installations per BS EN 50174
+ * - Safety services supply per BS 7671 Section 560
+ * 
+ * Fire Alarm Categories (BS 5839-1):
+ * - Category M: Manual systems
+ * - Category L1-L5: Automatic detection systems
+ * - Category P1-P2: Property protection systems
+ * 
+ * IMPORTANT DISCLAIMERS:
+ * - These calculations provide guidance only and do not constitute professional advice
+ * - All specialized systems must be designed by competent persons
+ * - Fire safety systems require approval from relevant authorities
+ * - System commissioning and testing mandatory per relevant standards
+ * - Professional indemnity insurance recommended for all electrical work
  */
 
 /**

@@ -260,36 +260,99 @@
   }
 }
 
-.disclaimer {
-  @include flex-center;
-  gap: var(--spacing-md);
-  background-color: #fff9e6;
-  border: var(--border-width-thin) solid var(--color-warning);
-  border-radius: var(--border-radius-lg);
-  padding: var(--spacing-lg);
+.standardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
   
   @include mobile-only {
-    flex-direction: column;
-    text-align: center;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
   }
 }
 
-.disclaimerIcon {
-  width: 1.5rem;
-  height: 1.5rem;
-  color: var(--color-warning);
-  flex-shrink: 0;
+.standard {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary);
+  }
+  
+  h3 {
+    color: var(--color-primary);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+  
+  p {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+    margin-bottom: var(--spacing-xs);
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 }
 
 .disclaimer {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border: 1px solid #ffd93d;
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-xl);
+  
+  @include flex-start;
+  gap: var(--spacing-md);
+  
+  .disclaimerIcon {
+    color: #b8860b;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  
+  div {
+    flex: 1;
+  }
+  
   p {
-    margin: 0;
-    color: var(--color-text-primary);
-    font-size: var(--font-size-sm);
-    line-height: var(--line-height-relaxed);
+    margin-bottom: var(--spacing-sm);
+    color: #8b4513;
+    font-weight: var(--font-weight-medium);
     
-    strong {
-      font-weight: var(--font-weight-semibold);
+    &:last-child {
+      margin-bottom: 0;
+      font-weight: var(--font-weight-bold);
+      color: #d2691e;
+    }
+  }
+  
+  ul {
+    margin: var(--spacing-sm) 0;
+    padding-left: var(--spacing-lg);
+    
+    li {
+      margin-bottom: var(--spacing-xs);
+      color: #8b4513;
+      font-size: var(--font-size-sm);
+      line-height: 1.4;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
   }
 }

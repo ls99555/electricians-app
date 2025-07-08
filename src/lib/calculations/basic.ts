@@ -1,6 +1,24 @@
 /**
  * Basic Electrical Calculations
  * Ohm's Law, Voltage Drop, and fundamental electrical calculations
+ * 
+ * Based on:
+ * - BS 7671:2018+A2:2022 (18th Edition) - Requirements for Electrical Installations
+ * - IET Guidance Note 6 - Protection Against Overcurrent
+ * - IET On-Site Guide (18th Edition)
+ * - BS EN 60617 - Graphical symbols for diagrams
+ * 
+ * UK Voltage Standards:
+ * - Single-phase: 230V ±10% (BS EN 50160)
+ * - Three-phase: 400V ±10% (BS EN 50160)
+ * - Frequency: 50Hz ±1% (BS EN 50160)
+ * 
+ * IMPORTANT DISCLAIMERS:
+ * - These calculations provide guidance only and do not constitute professional advice
+ * - All electrical work must be carried out by competent persons
+ * - Calculations must be verified by qualified electrical engineers
+ * - Professional indemnity insurance recommended for all electrical work
+ * - Always verify calculations against current BS 7671 and local regulations
  */
 
 import type { OhmLawResult, VoltageDropResult, CableSizingResult } from './types';
@@ -94,11 +112,18 @@ export class OhmLawCalculator {
 
 /**
  * Voltage Drop Calculator
- * Calculate voltage drop in cables based on BS 7671 requirements
+ * Calculate voltage drop in cables based on BS 7671 Section 525 requirements
+ * 
+ * BS 7671 Voltage Drop Limits:
+ * - Lighting circuits: 3% of supply voltage (BS 7671 Regulation 525.201)
+ * - Power circuits: 5% of supply voltage (BS 7671 Regulation 525.201)
+ * - Motor circuits: 5% at starting (BS 7671 Regulation 525.202)
+ * 
+ * Reference: BS 7671 Section 525 - Voltage drop in consumers' installations
  */
 export class VoltageDropCalculator {
   /**
-   * Calculate voltage drop for a cable run
+   * Calculate voltage drop for a cable run per BS 7671 requirements
    */
   static calculate(inputs: {
     current: number; // Load current (A)
@@ -108,8 +133,9 @@ export class VoltageDropCalculator {
     powerFactor: number; // Power factor (0.8-1.0)
     cableType: 'copper' | 'aluminium';
     temperature: number; // Conductor temperature (°C)
+    circuitType?: 'lighting' | 'power' | 'motor'; // Circuit type for BS 7671 limits
   }): VoltageDropResult {
-    const { current, length, cableSize, phases, powerFactor, cableType, temperature } = inputs;
+    const { current, length, cableSize, phases, powerFactor, cableType, temperature, circuitType = 'power' } = inputs;
 
     try {
       // Validate inputs
@@ -138,8 +164,8 @@ export class VoltageDropCalculator {
       const voltageDropPercentage = (voltageDrop / supplyVoltage) * 100;
       const voltageAtLoad = supplyVoltage - voltageDrop;
 
-      // Check against BS 7671 limits
-      const maxVoltageDropPercent = 5; // 5% for power circuits, 3% for lighting
+      // Check against BS 7671 voltage drop limits (Regulation 525.201)
+      const maxVoltageDropPercent = this.getMaxVoltageDropLimit(circuitType);
       const isWithinLimits = voltageDropPercentage <= maxVoltageDropPercent;
 
       return {
@@ -147,10 +173,24 @@ export class VoltageDropCalculator {
         voltageDropPercentage: Math.round(voltageDropPercentage * 100) / 100,
         voltageAtLoad: Math.round(voltageAtLoad * 100) / 100,
         isWithinLimits,
-        regulation: 'BS 7671 Section 525 - Voltage drop in consumers\' installations'
+        regulation: `BS 7671 Section 525 - Voltage drop limit: ${maxVoltageDropPercent}% for ${circuitType} circuits`
       };
     } catch (error) {
       throw new Error(`Voltage drop calculation error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Get maximum voltage drop limits per BS 7671 Regulation 525.201
+   */
+  private static getMaxVoltageDropLimit(circuitType: string): number {
+    switch (circuitType) {
+      case 'lighting':
+        return ELECTRICAL_CONSTANTS.MAX_VOLTAGE_DROP_LIGHTING; // 3% for lighting circuits
+      case 'power':
+      case 'motor':
+      default:
+        return ELECTRICAL_CONSTANTS.MAX_VOLTAGE_DROP_POWER; // 5% for power/motor circuits
     }
   }
 

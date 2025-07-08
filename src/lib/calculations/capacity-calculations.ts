@@ -1,7 +1,35 @@
 /**
  * Maximum Capacity Calculations
  * Service head, distribution board, transformer, and circuit capacity calculations
- * Based on BS 7671 and UK electrical installation practices
+ * 
+ * Based on:
+ * - BS 7671:2018+A2:2022 Section 311 - Assessment of general characteristics
+ * - BS 7671 Appendix A - Current-carrying capacity and voltage drop for cables
+ * - IET Guidance Note 1 - Selection & Erection of Equipment
+ * - G81 - Connection of generation equipment in parallel with DNO networks
+ * - Engineering Recommendation P2/6 - Security of Supply
+ * - BS EN 61936-1 - Power installations exceeding 1 kV a.c.
+ * 
+ * UK Electrical Supply Standards:
+ * - Single-phase domestic supply: typically 60-100A per phase
+ * - Three-phase domestic supply: typically 100A per phase
+ * - Commercial supplies: variable based on load assessment
+ * - Industrial supplies: designed per specific requirements
+ * - DNO approval required for supplies >100A per phase
+ * 
+ * Service Capacity Considerations:
+ * - After diversity maximum demand (ADMD) calculations
+ * - Future load expansion requirements
+ * - Grid connection capacity limitations
+ * - Power quality and harmonic considerations
+ * - Load balancing across phases
+ * 
+ * IMPORTANT DISCLAIMERS:
+ * - These calculations provide guidance only and do not constitute professional advice
+ * - All electrical work must be carried out by competent persons
+ * - Service capacity must be agreed with Distribution Network Operator
+ * - Load assessments must be verified by qualified electrical engineers
+ * - Professional indemnity insurance recommended for all electrical work
  */
 
 import type {

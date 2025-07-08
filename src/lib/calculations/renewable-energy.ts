@@ -1,7 +1,28 @@
 /**
  * Renewable Energy Calculations
  * Solar PV, Battery Storage, and renewable energy systems calculations
- * Based on UK Microgeneration Certification Scheme (MCS) standards
+ * 
+ * Based on:
+ * - BS 7671:2018+A2:2022 Section 712 - Solar photovoltaic (PV) power supply systems
+ * - BS EN 62446-1:2016 - Photovoltaic systems - Requirements for testing, documentation and maintenance
+ * - MCS 012 - Product certification scheme requirements: Inverters for Microgeneration Installations
+ * - G98/G99 - Grid connection requirements for generators up to 16A/75A per phase
+ * - IET Code of Practice for Grid-connected Solar Photovoltaic Systems
+ * - BS EN 62109 - Safety of power converters for use in photovoltaic power systems
+ * 
+ * UK Solar PV Requirements:
+ * - AC disconnect required within 3m of inverter (BS 7671 712.537.2.1.1)
+ * - DC isolation required at array and inverter (BS 7671 712.537.2.2.1)
+ * - Earthing requirements (BS 7671 712.542)
+ * - G98 notification for systems ≤16A per phase
+ * - G99 application for systems >16A per phase
+ * 
+ * IMPORTANT DISCLAIMERS:
+ * - These calculations provide guidance only and do not constitute professional advice
+ * - All electrical work must be carried out by competent persons
+ * - Solar installations must comply with MCS standards and G98/G99 requirements
+ * - Grid connection approval required from Distribution Network Operator
+ * - Professional indemnity insurance recommended for all electrical work
  */
 
 import type { SolarPVResult, BatteryStorageResult } from './types';

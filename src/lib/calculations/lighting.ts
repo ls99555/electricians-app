@@ -1,7 +1,34 @@
 /**
  * Lighting Calculations
  * Illuminance, emergency lighting, and lighting design calculations
- * Based on UK regulations and standards
+ * 
+ * Based on:
+ * - BS EN 12464-1:2021 - Light and lighting - Lighting of work places
+ * - BS 5266-1:2016 - Emergency lighting - Code of practice for emergency lighting
+ * - CIBSE Code for Lighting (2018)
+ * - CIBSE LG7 - Lighting for Offices
+ * - BS 667:2005 - Illuminance meters
+ * - BS 7909:2011 - Code of practice for temporary electrical systems
+ * 
+ * UK Lighting Standards:
+ * - Office lighting: 500 lux (BS EN 12464-1)
+ * - Emergency lighting: 1 lux minimum on escape routes (BS 5266-1)
+ * - Maintained illuminance values throughout maintenance cycle
+ * - Uniformity ratios per CIBSE guidance
+ * - Energy efficiency requirements per Building Regulations Part L
+ * 
+ * Emergency Lighting Requirements (BS 5266-1):
+ * - Minimum 1 lux on escape routes
+ * - Minimum 0.5 lux in open areas
+ * - 3-hour duration for most premises
+ * - Monthly function tests and annual full tests required
+ * 
+ * IMPORTANT DISCLAIMERS:
+ * - These calculations provide guidance only and do not constitute professional advice
+ * - All electrical work must be carried out by competent persons
+ * - Lighting design should be verified by qualified lighting engineers
+ * - Emergency lighting systems require regular testing and maintenance
+ * - Professional indemnity insurance recommended for all electrical work
  */
 
 import type { IlluminanceResult, EmergencyLightingResult } from './types';
