@@ -310,7 +310,7 @@ describe('FaultCurrentCalculator', () => {
         sourceImpedance: 0.15, // Transformer impedance
         cableImpedance: 0.25,  // Cable impedance to fault point
         earthingSystem: 'TN-S' as const,
-        faultType: 'phase_to_earth'
+        faultType: 'phase_to_earth' as const
       };
 
       const result = FaultCurrentCalculator.calculate(inputs);
@@ -328,7 +328,7 @@ describe('FaultCurrentCalculator', () => {
         sourceImpedance: 0.1,
         cableImpedance: 0.15,
         earthingSystem: 'TN-C-S' as const,
-        faultType: 'phase_to_phase'
+        faultType: 'phase_to_phase' as const
       };
 
       const result = FaultCurrentCalculator.calculate(inputs);
@@ -356,7 +356,7 @@ describe('FaultCurrentCalculator', () => {
         sourceImpedance: 0.35,
         cableImpedance: 1.5, // Higher impedance in TT system
         earthingSystem: 'TT' as const,
-        faultType: 'phase_to_earth'
+        faultType: 'phase_to_earth' as const
       };
 
       const result = FaultCurrentCalculator.calculate(inputs);
@@ -371,7 +371,7 @@ describe('FaultCurrentCalculator', () => {
         sourceImpedance: 0.08, // Low impedance supply
         cableImpedance: 0.12,
         earthingSystem: 'TN-C-S' as const,
-        faultType: 'phase_to_neutral'
+        faultType: 'phase_to_earth' as const
       };
 
       const result = FaultCurrentCalculator.calculate(inputs);
@@ -441,12 +441,12 @@ describe('Regulatory Compliance', () => {
       sourceImpedance: 0.15,
       cableImpedance: 0.25,
       earthingSystem: 'TN-S' as const,
-      faultType: 'phase_to_earth'
+      faultType: 'phase_to_earth' as const
     };
 
     const result = FaultCurrentCalculator.calculate(faultInputs);
 
     expect(result.recommendations).toBeDefined();
-    expect(result.recommendations.length).toBeGreaterThan(0);
+    expect(result.recommendations?.length).toBeGreaterThan(0);
   });
 });

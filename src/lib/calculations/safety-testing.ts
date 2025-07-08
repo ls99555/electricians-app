@@ -10,7 +10,6 @@ import type {
   EarthElectrodeResult, 
   FaultCurrentResult,
   EarthingSystem,
-  CircuitType,
   ElectrodeType
 } from './types';
 
@@ -61,7 +60,12 @@ export class LoopImpedanceCalculator {
     }
   }
 
-  private static validateInputs(inputs: any): void {
+  private static validateInputs(inputs: {
+    ze: number;
+    r1: number;
+    r2: number;
+    voltage: number;
+  }): void {
     const { ze, r1, r2, voltage } = inputs;
     
     if (ze < 0) throw new Error('Ze cannot be negative');
@@ -128,7 +132,7 @@ export class RCDSelectionCalculator {
     location: string;
     earthingSystem: 'TN-S' | 'TN-C-S' | 'TT';
   }): RCDSelectionResult {
-    const { loadCurrent, earthFaultLoopImpedance, circuitType, location, earthingSystem } = inputs;
+    const { circuitType, location, earthingSystem } = inputs;
     
     try {
       // Validate inputs
@@ -172,7 +176,10 @@ export class RCDSelectionCalculator {
     }
   }
 
-  private static validateInputs(inputs: any): void {
+  private static validateInputs(inputs: {
+    loadCurrent: number;
+    earthFaultLoopImpedance: number;
+  }): void {
     const { loadCurrent, earthFaultLoopImpedance } = inputs;
     
     if (loadCurrent <= 0) throw new Error('Load current must be positive');
@@ -225,7 +232,6 @@ export class EarthElectrodeCalculator {
       soilResistivity,
       electrodeLength,
       electrodeDiameter = 0.016, // Default 16mm
-      installationDepth = 0.6,
       seasonalVariation = true,
       installationType = 'TT',
       rcdRating = 30
@@ -293,7 +299,10 @@ export class EarthElectrodeCalculator {
     }
   }
 
-  private static validateInputs(inputs: any): void {
+  private static validateInputs(inputs: {
+    soilResistivity: number;
+    electrodeLength: number;
+  }): void {
     const { soilResistivity, electrodeLength } = inputs;
     
     if (soilResistivity <= 0) throw new Error('Soil resistivity must be positive');
@@ -417,7 +426,6 @@ export class FaultCurrentCalculator {
       sourceImpedance, 
       cableImpedance,
       cableData, 
-      loadImpedance = 0, 
       systemType = 'single_phase', 
       faultType = 'phase_to_earth',
       earthingSystem = 'TN-S'
@@ -528,7 +536,13 @@ export class FaultCurrentCalculator {
     }
   }
 
-  private static validateInputs(inputs: any): void {
+  private static validateInputs(inputs: {
+    supplyVoltage?: number;
+    sourceVoltage?: number;
+    sourceImpedance: number;
+    cableData?: { length: number; resistance: number; reactance: number };
+    cableImpedance?: number;
+  }): void {
     const { supplyVoltage, sourceVoltage, sourceImpedance, cableData, cableImpedance } = inputs;
     
     const voltage = supplyVoltage || sourceVoltage;
