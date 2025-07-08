@@ -10,6 +10,12 @@
   }
 }
 
+@mixin tablet-only {
+  @media (min-width: #{$breakpoint-md}) and (max-width: #{$breakpoint-lg - 1px}) {
+    @content;
+  }
+}
+
 @mixin tablet-up {
   @media (min-width: #{$breakpoint-md}) {
     @content;
@@ -39,6 +45,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+@mixin flex-start {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
 }
 
 @mixin flex-column-center {

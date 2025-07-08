@@ -38,8 +38,12 @@
 - [x] Mobile-responsive design system
 - [x] Basic electrical calculations library
 - [x] **COMPLETED: Modular calculation structure (types, basic, load-demand, cable-protection, lighting, safety-testing, power-systems, renewable-energy, motor-calculations, specialized-applications, capacity-calculations)**
-- [x] **COMPLETED: All calculations moved from electrical.ts to modular files**
-- [x] **COMPLETED: All calculations reference UK regulations (BS 7671)**
+- [x] **COMPLETED: All calculation modules updated with comprehensive UK electrical regulation compliance**
+- [x] **COMPLETED: BS 7671:2018+A2:2022 (18th Edition) references throughout all calculations**
+- [x] **COMPLETED: Building Regulations Part P compliance calculator implemented**
+- [x] **COMPLETED: Professional disclaimers and safety warnings added to all modules**
+- [x] **COMPLETED: All calculations include proper regulation section references**
+- [x] **COMPLETED: Enhanced Ohm's Law calculator UI with UK standards reference**
 - [x] **COMPLETED: Jest testing framework setup with comprehensive unit tests**
 - [x] **COMPLETED: Basic calculations fully tested (138 passing tests total)**
 - [x] **COMPLETED: Motor calculations with VFD sizing and efficiency analysis**
@@ -197,10 +201,10 @@
 - [ ] Hazardous Area Calculations
 
 ### Building Regulations & Standards
-- [ ] Part P Compliance Calculator
-- [ ] Building Regulation Load Assessment
-- [ ] Energy Performance Calculator
-- [ ] Minimum Circuit Requirements
+- [x] Part P Compliance Calculator
+- [x] Building Regulation Load Assessment
+- [x] Energy Performance Calculator
+- [x] Minimum Circuit Requirements
 - [ ] Special Location Requirements
 - [ ] Medical Location Calculations
 - [ ] School/Educational Facility Calcs
