@@ -6,8 +6,6 @@
 
 import type { 
   MotorLoadResult,
-  MotorStartingResult,
-  MotorProtectionResult,
   VFDSizingResult,
   MotorEfficiencyResult
 } from './types';
@@ -282,7 +280,6 @@ export class VFDSizingCalculator {
     const {
       motorPower,
       motorVoltage,
-      motorCurrent,
       operatingProfile,
       overloadRequirement,
       ambientTemp,
@@ -381,9 +378,8 @@ export class MotorEfficiencyCalculator {
     operatingHours: number; // Hours per year
     energyCost: number; // Cost per kWh
     motorClass: 'IE1' | 'IE2' | 'IE3' | 'IE4'; // Efficiency class
-    powerFactor: number; // Operating power factor
   }): MotorEfficiencyResult {
-    const { motorPower, loadFactor, operatingHours, energyCost, motorClass, powerFactor } = inputs;
+    const { motorPower, loadFactor, operatingHours, energyCost, motorClass } = inputs;
 
     try {
       this.validateEfficiencyInputs(inputs);
@@ -446,15 +442,13 @@ export class MotorEfficiencyCalculator {
     loadFactor: number;
     operatingHours: number;
     energyCost: number;
-    powerFactor: number;
   }): void {
-    const { motorPower, loadFactor, operatingHours, energyCost, powerFactor } = inputs;
+    const { motorPower, loadFactor, operatingHours, energyCost } = inputs;
 
     if (motorPower <= 0) throw new Error('Motor power must be positive');
     if (loadFactor <= 0 || loadFactor > 1) throw new Error('Load factor must be between 0 and 1');
     if (operatingHours < 0 || operatingHours > 8760) throw new Error('Operating hours must be between 0 and 8760');
     if (energyCost < 0) throw new Error('Energy cost cannot be negative');
-    if (powerFactor <= 0 || powerFactor > 1) throw new Error('Power factor must be between 0 and 1');
   }
 
   private static getMotorEfficiency(power: number, loadFactor: number, motorClass: string): number {

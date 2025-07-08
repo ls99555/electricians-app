@@ -5,7 +5,6 @@
  */
 
 import type { SolarPVResult, BatteryStorageResult } from './types';
-import { ELECTRICAL_CONSTANTS } from './types';
 
 /**
  * Solar PV System Calculator

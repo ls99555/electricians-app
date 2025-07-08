@@ -231,7 +231,12 @@ export class DistributionBoardCalculator {
   }
 
   private static validateDistributionBoardInputs(inputs: {
-    circuits: Array<any>;
+    circuits: Array<{
+      type: string;
+      load: number;
+      diversity: number;
+      protection: number;
+    }>;
     phases: number;
     voltage: number;
     spareWays: number;
@@ -276,7 +281,6 @@ export class TransformerCalculator {
       primaryVoltage, 
       secondaryVoltage, 
       loadPower, 
-      loadPowerFactor, 
       efficiency, 
       diversityFactor,
       ambientTemp,

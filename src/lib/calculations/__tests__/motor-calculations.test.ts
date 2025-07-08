@@ -131,7 +131,7 @@ describe('MotorLoadCalculator', () => {
         {
           motorPower: 5,
           voltage: 400,
-          phases: 2 as any,
+          phases: 4 as any,
           efficiency: 0.85,
           powerFactor: 0.85,
           startingMethod: 'direct' as const,

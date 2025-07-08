@@ -18,7 +18,7 @@ export class OhmLawCalculator {
    */
   static calculate(values: Partial<OhmLawResult>): OhmLawResult {
     const { voltage: V, current: I, resistance: R, power: P } = values;
-    let result: OhmLawResult = { ...values };
+    const result: OhmLawResult = { ...values };
 
     try {
       // Calculate Voltage (V = I × R or V = √(P × R) or V = P / I)

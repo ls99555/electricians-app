@@ -167,7 +167,7 @@ describe('DistributionBoardCalculator', () => {
 
     it('should recommend larger board for high utilization', () => {
       const inputs = {
-        circuits: Array(10).fill(null).map((_, i) => ({
+        circuits: Array(10).fill(null).map(() => ({
           type: 'power' as const,
           load: 1000,
           diversity: 0.5,
