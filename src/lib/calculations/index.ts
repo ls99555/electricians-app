@@ -54,6 +54,28 @@ export {
   PowerFactorCalculator
 } from './power-systems';
 
+// Export motor and drive calculations
+export {
+  MotorLoadCalculator,
+  VFDSizingCalculator,
+  MotorEfficiencyCalculator
+} from './motor-calculations';
+
+// Export specialized applications calculations
+export {
+  FireAlarmCalculator,
+  CCTVCalculator,
+  DataCenterCalculator
+} from './specialized-applications';
+
+// Export capacity calculations
+export {
+  ServiceHeadCalculator,
+  DistributionBoardCalculator,
+  TransformerCalculator,
+  CircuitCapacityCalculator
+} from './capacity-calculations';
+
 // Utility functions
 export const ElectricalUtils = {
   /**

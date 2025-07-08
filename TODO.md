@@ -82,6 +82,8 @@
 - [ ] Energy Efficiency Calculator (lumens per watt)
 - [ ] Uniformity Ratio Calculator
 - [ ] Glare Index Calculator
+- [ ] lighting calculator based on domestic rooms of house 
+- [ ] lighting calculator based on cdiffernet commerical and industrical settings 
 
 ### Cable & Protection Calculations
 - [x] Cable Current Carrying Capacity (all installation methods)

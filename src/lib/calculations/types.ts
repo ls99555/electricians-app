@@ -245,6 +245,157 @@ export interface BatteryStorageResult {
   regulation: string;
 }
 
+// Motor and drive calculation results
+export interface MotorLoadResult {
+  motorPower: number;
+  fullLoadCurrent: number;
+  startingCurrent: number;
+  apparentPower: number;
+  activePower: number;
+  reactivePower: number;
+  cableRating: number;
+  protectionRating: number;
+  startingTime: number;
+  startingEnergy: number;
+  recommendations: string[];
+  regulation: string;
+}
+
+export interface MotorStartingResult {
+  startingMethod: string;
+  startingCurrent: number;
+  startingTorque: number;
+  startingTime: number;
+  voltageReduction: number;
+  recommendations: string[];
+  regulation: string;
+}
+
+export interface MotorProtectionResult {
+  overloadProtection: number;
+  shortCircuitProtection: number;
+  thermalProtection: boolean;
+  earthFaultProtection: boolean;
+  recommendations: string[];
+  regulation: string;
+}
+
+export interface VFDSizingResult {
+  recommendedVFDPower: number;
+  vfdCurrent: number;
+  inputPower: number;
+  efficiency: number;
+  harmonicDistortion: number;
+  operatingProfile: string;
+  recommendations: string[];
+  regulation: string;
+}
+
+export interface MotorEfficiencyResult {
+  efficiency: number;
+  inputPower: number;
+  actualPower: number;
+  losses: number;
+  lossPercentage: number;
+  annualEnergyConsumption: number;
+  annualEnergyCost: number;
+  potentialSavings: { annualSavings: number; paybackYears: number } | null;
+  recommendations: string[];
+  regulation: string;
+}
+
+// Specialized applications calculation results
+export interface FireAlarmResult {
+  numberOfDevices: number;
+  standbyCurrentAmps: number;
+  alarmCurrentAmps: number;
+  batteryCapacityAh: number;
+  powerSupplyRating: number;
+  minCableCSA: number;
+  maxVoltageDrop: number;
+  recommendations: string[];
+  regulation: string;
+}
+
+export interface CCTVResult {
+  totalCameras: number;
+  totalPowerConsumption: number;
+  totalCurrent: number;
+  minCableCSA: number;
+  upsRating: number;
+  batteryBackupTime: number;
+  dailyEnergyConsumption: number;
+  recommendations: string[];
+  regulation: string;
+}
+
+export interface DataCenterResult {
+  itLoad: number;
+  totalFacilityPower: number;
+  upsCapacity: number;
+  generatorCapacity: number;
+  coolingLoad: number;
+  totalCurrent: number;
+  mainBreakerRating: number;
+  batteryCapacity: number;
+  pue: number;
+  redundancyLevel: string;
+  recommendations: string[];
+  regulation: string;
+}
+
+// Maximum capacity calculation results
+export interface ServiceHeadResult {
+  totalConnectedLoad: number;
+  maximumDemand: number;
+  designMaximumDemand: number;
+  designCurrent: number;
+  serviceHeadCapacity: number;
+  utilizationFactor: number;
+  recommendations: string[];
+  regulation: string;
+}
+
+export interface DistributionBoardResult {
+  totalConnectedLoad: number;
+  totalDemand: number;
+  totalCurrent: number;
+  mainSwitchRating: number;
+  usedWays: number;
+  spareWays: number;
+  recommendedBoardSize: number;
+  boardUtilization: number;
+  recommendations: string[];
+  regulation: string;
+}
+
+export interface TransformerResult {
+  loadPower: number;
+  requiredCapacity: number;
+  selectedRating: number;
+  utilization: number;
+  efficiency: number;
+  losses: number;
+  primaryCurrent: number;
+  secondaryCurrent: number;
+  tempDerating: number;
+  recommendations: string[];
+  regulation: string;
+}
+
+export interface CircuitCapacityResult {
+  circuitType: string;
+  cableSize: number;
+  baseCurrentCarryingCapacity: number;
+  deratedCapacity: number;
+  voltageDropConstraint: number;
+  circuitCapacity: number;
+  maxLoad: number;
+  utilizationFactor: number;
+  recommendations: string[];
+  regulation: string;
+}
+
 // Common input types
 export interface EVChargingInputs {
   chargerRating: number;
