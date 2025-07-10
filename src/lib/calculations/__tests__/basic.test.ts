@@ -3,7 +3,7 @@
  * Testing compliance with UK electrical regulations (BS 7671)
  */
 
-import { OhmLawCalculator, VoltageDropCalculator, CableSizingCalculator } from '../basic';
+import { OhmLawCalculator, VoltageDropCalculator, CableSizingCalculator } from '../core/basic';
 
 describe('OhmLawCalculator', () => {
   describe('calculate()', () => {

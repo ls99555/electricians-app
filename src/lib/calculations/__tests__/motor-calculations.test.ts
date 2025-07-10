@@ -8,7 +8,7 @@ import {
   MotorLoadCalculator,
   VFDSizingCalculator,
   MotorEfficiencyCalculator
-} from '../motor-calculations';
+} from '../specialized/motor-calculations';
 
 describe('MotorLoadCalculator', () => {
   describe('calculate', () => {

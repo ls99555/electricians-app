@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Calculator, Zap, Cable, Home, Menu, X } from 'lucide-react';
+import { Calculator, Zap, Cable, Home, Menu, X, Lightbulb, Shield } from 'lucide-react';
 import { useState } from 'react';
 import styles from './navigation.module.scss';
 
@@ -24,6 +24,24 @@ const calculators = [
     path: '/calculator/cable-sizing',
     icon: Cable,
     description: 'Size cables with derating factors'
+  },
+  {
+    name: 'Maximum Demand',
+    path: '/calculator/maximum-demand',
+    icon: Home,
+    description: 'Calculate maximum demand with diversity'
+  },
+  {
+    name: 'Illuminance',
+    path: '/calculator/illuminance',
+    icon: Lightbulb,
+    description: 'Lighting design calculations'
+  },
+  {
+    name: 'Building Regulations',
+    path: '/calculator/building-regulations',
+    icon: Shield,
+    description: 'Part P compliance & building loads'
   }
 ];
 
@@ -52,10 +70,18 @@ export default function Navigation() {
             Home
           </Link>
           
+          <Link 
+            href="/calculators" 
+            className={`${styles.navLink} ${pathname === '/calculators' ? styles.active : ''}`}
+          >
+            <Calculator size={18} />
+            All Calculators
+          </Link>
+          
           <div className={styles.dropdown}>
             <button className={styles.dropdownToggle}>
               <Calculator size={18} />
-              Calculators
+              Quick Access
             </button>
             <div className={styles.dropdownMenu}>
               {calculators.map((calc) => {
@@ -98,8 +124,17 @@ export default function Navigation() {
             Home
           </Link>
           
+          <Link 
+            href="/calculators" 
+            className={`${styles.mobileNavLink} ${pathname === '/calculators' ? styles.active : ''}`}
+            onClick={closeMenu}
+          >
+            <Calculator size={20} />
+            All Calculators
+          </Link>
+          
           <div className={styles.mobileSection}>
-            <h3 className={styles.mobileSectionTitle}>Calculators</h3>
+            <h3 className={styles.mobileSectionTitle}>Quick Access</h3>
             {calculators.map((calc) => {
               const Icon = calc.icon;
               return (

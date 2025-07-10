@@ -130,14 +130,22 @@ html {
   line-height: var(--line-height-base);
   color: var(--color-text-primary);
   background-color: var(--color-bg-primary);
+  height: 100%;
 }
 
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Utility classes */
+.main-content {
+  flex: 1 0 auto;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;

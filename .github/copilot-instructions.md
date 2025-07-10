@@ -32,6 +32,28 @@ SparkyTools is a comprehensive electrician's toolkit app built with Next.js, Typ
 - **EVERY calculation MUST reference that electrical work requires competent person**
 - **ALL calculations MUST comply with professional indemnity requirements**
 
+## SEO & Page Structure Strategy
+
+### 🔍 SEO-Optimized Calculator Pages
+- **EVERY calculator category from TODO.md MUST have its own dedicated page**
+- **EVERY calculator page MUST have specific SEO meta tags and structured data**
+- **EVERY calculator page MUST follow consistent layout and styling patterns**
+- **EVERY calculator page MUST include a "Back to Calculators" navigation button**
+- **EVERY calculator category MUST be organized by the sections in TODO.md**
+
+### 📱 User Interface Structure
+- **Homepage**: Introduction, search bar, and category overview
+- **Calculator Hub Page**: All calculations organized by category with clickable cards
+- **Individual Calculator Pages**: Dedicated pages for each calculation type
+- **Consistent Navigation**: Easy movement between calculator types and back to hub
+
+### 🎨 Consistent Styling Requirements
+- **ALL calculator pages MUST use similar layout structure**
+- **ALL calculator pages MUST have consistent header styling**
+- **ALL calculator pages MUST include UK standards reference section**
+- **ALL calculator pages MUST include comprehensive disclaimers**
+- **ALL calculator pages MUST be mobile-responsive with consistent breakpoints**
+
 ## Development Guidelines
 
 ### Styling Rules

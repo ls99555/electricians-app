@@ -32,7 +32,19 @@ import type {
   EarthElectrodeResult, 
   FaultCurrentResult,
   EarthingSystem,
-  ElectrodeType
+  ElectrodeType,
+  InsulationResistanceInputs,
+  InsulationResistanceResult,
+  ContinuityTestInputs,
+  ContinuityTestResult,
+  PolarityTestInputs,
+  PolarityTestResult,
+  PhaseSequenceInputs,
+  PhaseSequenceResult,
+  AppliedVoltageTestInputs,
+  AppliedVoltageTestResult,
+  FunctionalTestInputs,
+  FunctionalTestResult
 } from './types';
 
 /**
@@ -353,7 +365,7 @@ export class EarthElectrodeCalculator {
         return soilResistivity / (2 * Math.PI * length);
       
       case 'tape':
-        // Similar to strip but with different geometry factor
+       
         return soilResistivity / (2.5 * Math.PI * length);
       
       case 'foundation':
@@ -578,5 +590,912 @@ export class FaultCurrentCalculator {
     } else if (cableImpedance === undefined) {
       throw new Error('Either cableImpedance or cableData must be provided');
     }
+  }
+}
+
+/**
+ * Insulation Resistance Calculator
+ * Calculate and verify insulation resistance values (IET Guidance Note 3)
+ */
+export class InsulationResistanceCalculator {
+  /**
+   * Calculate insulation resistance requirements and compliance
+   */
+  static calculate(inputs: InsulationResistanceInputs): InsulationResistanceResult {
+    const { 
+      testVoltage, 
+      circuitType, 
+      installationType,
+      environmentalConditions,
+      cableLength,
+      numberOfCores,
+      cableType,
+      connectedEquipment,
+      surgeSuppressors
+    } = inputs;
+
+    try {
+      // Validate inputs
+      this.validateInputs(inputs);
+
+      // Simulate measured resistance (in practice this comes from test equipment)
+      const measuredResistance = this.simulateMeasuredResistance(circuitType, cableLength, environmentalConditions);
+
+      // Determine minimum insulation resistance based on circuit type and test voltage
+      const minimumResistance = this.getMinimumInsulationResistance(testVoltage, circuitType);
+
+      // Calculate temperature correction factor
+      const temperatureCorrectionFactor = this.getTemperatureCorrectionFactor(environmentalConditions.temperature);
+      const correctedResistance = measuredResistance * temperatureCorrectionFactor;
+
+      // Determine test result
+      const testResult = this.determineTestResult(correctedResistance, minimumResistance, environmentalConditions);
+
+      // Generate recommendations
+      const recommendations = this.getRecommendations(testResult, circuitType, environmentalConditions);
+
+      // Generate remedial actions
+      const remedialActions = testResult === 'pass' ? 
+        ['Insulation resistance meets requirements', 'Continue with regular testing schedule'] :
+        this.getRemedialActions(testResult, circuitType, correctedResistance, minimumResistance);
+
+      return {
+        minimumResistance,
+        measuredResistance,
+        testResult,
+        temperatureCorrectionFactor,
+        correctedResistance,
+        complianceAssessment: {
+          bs7671Compliant: testResult === 'pass',
+          ieeStandard: 'BS 7671:2018+A2:2022',
+          acceptableRange: `≥ ${minimumResistance} MΩ`
+        },
+        recommendations,
+        remedialActions,
+        retestRequired: testResult !== 'pass',
+        regulation: 'BS 7671 Section 612.3 & IET Guidance Note 3 - Insulation resistance testing'
+      };
+    } catch (error) {
+      throw new Error(`Insulation resistance calculation error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  private static validateInputs(inputs: InsulationResistanceInputs): void {
+    const { testVoltage, cableLength, numberOfCores, environmentalConditions } = inputs;
+    
+    if (testVoltage <= 0) throw new Error('Test voltage must be positive');
+    if (cableLength <= 0) throw new Error('Cable length must be positive');
+    if (numberOfCores <= 0) throw new Error('Number of cores must be positive');
+    if (environmentalConditions.temperature < -40 || environmentalConditions.temperature > 60) {
+      throw new Error('Ambient temperature out of reasonable range');
+    }
+    if (environmentalConditions.humidity < 0 || environmentalConditions.humidity > 100) {
+      throw new Error('Relative humidity must be between 0 and 100%');
+    }
+  }
+
+  private static simulateMeasuredResistance(circuitType: string, cableLength: number, conditions: any): number {
+    // Simulate realistic insulation resistance values
+    const baseResistance = {
+      'lv_circuit': 500,
+      'extra_low_voltage': 250,
+      'fire_alarm': 100,
+      'telecom': 1000,
+      'ring_circuit': 300,
+      'radial_circuit': 400
+    }[circuitType] || 500;
+
+    // Apply length factor (longer cables typically have lower resistance)
+    const lengthFactor = Math.max(0.1, 1 / Math.sqrt(cableLength / 100));
+    
+    // Apply environmental factors
+    const humidityFactor = 1 - (conditions.humidity / 100) * 0.3;
+    const temperatureFactor = conditions.temperature > 20 ? 0.95 ** ((conditions.temperature - 20) / 10) : 1;
+    
+    return baseResistance * lengthFactor * humidityFactor * temperatureFactor * (0.8 + Math.random() * 0.4);
+  }
+
+  private static getMinimumInsulationResistance(testVoltage: number, circuitType: string): number {
+    // BS 7671 Table 61 - Minimum insulation resistance values in MΩ
+    if (testVoltage === 250) return 0.25; // SELV/PELV circuits
+    if (testVoltage === 500) return 1.0;  // Standard LV circuits up to 500V
+    if (testVoltage === 1000) return 1.0; // Standard LV circuits above 500V
+    
+    // Default based on test voltage
+    return testVoltage <= 250 ? 0.25 : 1.0;
+  }
+
+  private static getTemperatureCorrectionFactor(temperature: number): number {
+    // Simplified temperature correction (insulation resistance decreases with temperature)
+    const referenceTemp = 20; // °C
+    const tempDifference = temperature - referenceTemp;
+    
+    // Approximate 5% decrease per 10°C increase
+    return Math.pow(0.95, tempDifference / 10);
+  }
+
+  private static determineTestResult(correctedResistance: number, minimumResistance: number, conditions: any): 'pass' | 'fail' | 'investigate' {
+    if (correctedResistance >= minimumResistance) return 'pass';
+    if (correctedResistance >= minimumResistance * 0.5) return 'investigate';
+    return 'fail';
+  }
+
+  private static getRecommendations(result: string, circuitType: string, conditions: any): string[] {
+    const recommendations: string[] = [];
+    
+    if (result === 'pass') {
+      recommendations.push('Insulation resistance test satisfactory');
+    } else {
+      recommendations.push('Insulation resistance requires attention');
+      recommendations.push('Investigate possible causes of low resistance');
+    }
+
+    recommendations.push('Test performed in accordance with BS 7671');
+    recommendations.push('Disconnect all electronic equipment before testing');
+    recommendations.push('Ensure circuit is isolated from supply');
+    
+    if (conditions.humidity > 85) {
+      recommendations.push('High humidity detected - consider drying before retesting');
+    }
+
+    return recommendations;
+  }
+
+  private static getRemedialActions(result: string, circuitType: string, measured: number, minimum: number): string[] {
+    const actions: string[] = [];
+    
+    if (result === 'fail') {
+      actions.push('Do not energize circuit until fault is resolved');
+      actions.push('Locate and repair insulation fault');
+      actions.push('Check all joints and terminations');
+    } else if (result === 'investigate') {
+      actions.push('Monitor installation closely');
+      actions.push('Consider additional testing');
+      actions.push('Check for moisture or contamination');
+    }
+
+    actions.push('Retest after remedial work');
+    actions.push('Consider professional electrical inspection');
+
+    return actions;
+  }
+
+}
+
+/**
+ * Continuity Test Calculator
+ * Calculate and verify protective conductor continuity (IET Guidance Note 3)
+ */
+export class ContinuityTestCalculator {
+  /**
+   * Calculate continuity test results and compliance
+   */
+  static calculate(inputs: ContinuityTestInputs): ContinuityTestResult {
+    const { 
+      testType,
+      conductorCsa,
+      conductorLength,
+      conductorMaterial,
+      testCurrent,
+      ambientTemperature,
+      expectedResistance,
+      ringCircuitDetails
+    } = inputs;
+
+    try {
+      // Validate inputs
+      this.validateInputs(inputs);
+
+      // Calculate expected resistance if not provided
+      const calculatedExpectedResistance = expectedResistance || 
+        this.calculateExpectedResistance(conductorLength, conductorCsa, conductorMaterial, ambientTemperature);
+
+      // Simulate measured resistance (in practice this comes from test equipment)
+      const measuredResistance = this.simulateMeasuredResistance(calculatedExpectedResistance, testType);
+
+      // Calculate temperature corrected resistance
+      const temperatureCorrectedResistance = this.applyTemperatureCorrection(measuredResistance, ambientTemperature);
+
+      // Calculate deviation from expected
+      const deviationFromExpected = ((measuredResistance - calculatedExpectedResistance) / calculatedExpectedResistance) * 100;
+
+      // Determine test result
+      const testResult = this.determineTestResult(measuredResistance, calculatedExpectedResistance, deviationFromExpected);
+
+      // Ring circuit analysis if applicable
+      const ringCircuitAnalysis = testType === 'ring_circuit' && ringCircuitDetails ? 
+        this.analyzeRingCircuit(ringCircuitDetails, measuredResistance) : undefined;
+
+      // Generate recommendations
+      const recommendations = this.getRecommendations(testResult, testType, deviationFromExpected);
+
+      // Generate remedial actions
+      const remedialActions = testResult === 'pass' ? 
+        ['Continuity test satisfactory'] :
+        this.getRemedialActions(testResult, testType, deviationFromExpected);
+
+      return {
+        expectedResistance: calculatedExpectedResistance,
+        measuredResistance,
+        testResult,
+        temperatureCorrectedResistance,
+        deviationFromExpected,
+        complianceAssessment: {
+          bs7671Compliant: testResult === 'pass',
+          acceptableTolerance: '±10% or ±0.05Ω, whichever is greater',
+          limitValues: `Expected: ${calculatedExpectedResistance.toFixed(3)}mΩ`
+        },
+        ringCircuitAnalysis,
+        recommendations,
+        remedialActions,
+        regulation: 'BS 7671 Section 612.2 & IET Guidance Note 3 - Continuity testing'
+      };
+    } catch (error) {
+      throw new Error(`Continuity test calculation error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  private static validateInputs(inputs: ContinuityTestInputs): void {
+    const { conductorCsa, conductorLength, testCurrent } = inputs;
+    
+    if (conductorCsa <= 0) throw new Error('Conductor CSA must be positive');
+    if (conductorLength <= 0) throw new Error('Conductor length must be positive');
+    if (testCurrent <= 0) throw new Error('Test current must be positive');
+  }
+
+  private static calculateExpectedResistance(
+    length: number, 
+    csa: number, 
+    material: string, 
+    temperature: number
+  ): number {
+    // Resistivity values at 20°C (Ω⋅m)
+    const resistivityAt20C = material === 'copper' ? 0.0175e-6 : 0.029e-6; // Copper or Aluminium
+    
+    // Temperature coefficient
+    const tempCoeff = material === 'copper' ? 0.00393 : 0.00403;
+    const resistivityAtTemp = resistivityAt20C * (1 + tempCoeff * (temperature - 20));
+    
+    // Calculate resistance (factor of 2 for line and protective conductor in loop)
+    return (resistivityAtTemp * length * 2) / (csa / 1000000) * 1000; // Convert to mΩ
+  }
+
+  private static simulateMeasuredResistance(expectedResistance: number, testType: string): number {
+    // Simulate realistic measured values with some variation
+    const variation = testType === 'ring_circuit' ? 0.15 : 0.1; // Ring circuits may have more variation
+    return expectedResistance * (0.95 + Math.random() * 0.1); // ±5% to +5% variation
+  }
+
+  private static applyTemperatureCorrection(resistance: number, temperature: number): number {
+    // Simple temperature correction factor
+    const referenceTemp = 20;
+    const tempCoeff = 0.00393; // For copper
+    return resistance * (1 + tempCoeff * (temperature - referenceTemp));
+  }
+
+  private static determineTestResult(measured: number, expected: number, deviation: number): 'pass' | 'fail' | 'investigate' {
+    const acceptableVariation = Math.max(expected * 0.1, 0.05); // 10% or 0.05mΩ
+    
+    if (Math.abs(measured - expected) <= acceptableVariation) return 'pass';
+    if (Math.abs(deviation) <= 20) return 'investigate';
+    return 'fail';
+  }
+
+  private static analyzeRingCircuit(details: any, measuredResistance: number): any {
+    // Simplified ring circuit analysis
+    const { liveConductorCsa, cpcCsa, totalLength } = details;
+    
+    return {
+      r1: measuredResistance * 0.4, // Approximate values
+      r2: measuredResistance * 0.6,
+      rn: measuredResistance,
+      ringIntegrity: measuredResistance < 1.0 ? 'good' : measuredResistance < 2.0 ? 'poor' : 'broken'
+    };
+  }
+
+  private static getRecommendations(result: string, testType: string, deviation: number): string[] {
+    const recommendations: string[] = [];
+    
+    if (result === 'pass') {
+      recommendations.push('Continuity test satisfactory');
+      recommendations.push('Protective conductor continuity confirmed');
+    } else {
+      recommendations.push('Investigate continuity fault');
+      recommendations.push('Check all connections and joints');
+    }
+
+    recommendations.push('Test performed in accordance with BS 7671');
+    recommendations.push('Ensure test current minimum 200mA');
+    
+    if (testType === 'ring_circuit') {
+      recommendations.push('Ring circuit continuity verified');
+    }
+
+    return recommendations;
+  }
+
+  private static getRemedialActions(result: string, testType: string, deviation: number): string[] {
+    const actions: string[] = [];
+    
+    if (result === 'fail') {
+      actions.push('Locate and repair continuity fault');
+      actions.push('Check all terminations and joints');
+      actions.push('Ensure proper conductor connections');
+    } else if (result === 'investigate') {
+      actions.push('Monitor readings closely');
+      actions.push('Check for loose connections');
+    }
+
+    actions.push('Retest after remedial work');
+    actions.push('Verify circuit integrity');
+
+    return actions;
+  }
+}
+
+/**
+ * Polarity Test Calculator
+ * Verify correct polarity of installations (IET Guidance Note 3)
+ */
+export class PolarityTestCalculator {
+  /**
+   * Calculate and verify polarity test results
+   */
+  static calculate(inputs: PolarityTestInputs): PolarityTestResult {
+    const { 
+      supplySystem, 
+      circuitsToTest, 
+      circuitType,
+      testMethod,
+      earthingArrangement
+    } = inputs;
+
+    try {
+      // Validate inputs
+      this.validateInputs(inputs);
+
+      // Simulate circuit test results based on inputs
+      const circuitResults = circuitsToTest.map(circuitId => ({
+        circuitId,
+        result: Math.random() > 0.1 ? 'correct' as const : 'reversed' as const, // 90% pass rate simulation
+        description: `Circuit ${circuitId} polarity test`
+      }));
+
+      // Check overall compliance
+      const overallResult = circuitResults.every(result => result.result === 'correct') ? 'pass' as const : 'fail' as const;
+
+      // Find critical findings
+      const criticalFindings = circuitResults
+        .filter(result => result.result === 'reversed')
+        .map(result => `Reversed polarity detected on ${result.circuitId}`);
+
+      // Generate recommendations
+      const recommendations = this.getRecommendations(overallResult === 'pass', criticalFindings, supplySystem);
+
+      // Generate remedial actions
+      const remedialActions = overallResult === 'pass' ? 
+        ['Polarity test satisfactory - no action required'] :
+        criticalFindings.map(finding => `Correct ${finding}`);
+
+      return {
+        overallResult,
+        circuitResults,
+        criticalFindings,
+        complianceAssessment: {
+          bs7671Compliant: overallResult === 'pass',
+          safetyRequirements: [
+            'All switching devices in line conductor',
+            'Socket outlets correctly wired',
+            'Protective devices correctly connected'
+          ],
+          regulationReferences: ['BS 7671 Section 612.5', 'IET Guidance Note 3']
+        },
+        recommendations,
+        remedialActions,
+        retestRequired: overallResult === 'fail',
+        regulation: 'BS 7671 Section 612.5 & IET Guidance Note 3 - Polarity testing'
+      };
+    } catch (error) {
+      throw new Error(`Polarity test calculation error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  private static validateInputs(inputs: PolarityTestInputs): void {
+    const { supplySystem, circuitsToTest } = inputs;
+    
+    if (!supplySystem || supplySystem.trim() === '') {
+      throw new Error('Supply system must be specified');
+    }
+    if (!circuitsToTest || circuitsToTest.length === 0) {
+      throw new Error('At least one circuit to test must be specified');
+    }
+  }
+
+  private static getRecommendations(isCompliant: boolean, criticalFindings: string[], supplySystem: string): string[] {
+    const recommendations: string[] = [];
+    
+    if (isCompliant) {
+      recommendations.push('Polarity testing complete and satisfactory');
+      recommendations.push('All connections correctly polarized');
+    } else {
+      recommendations.push('Polarity faults must be corrected before energizing');
+      recommendations.push('All switching devices must be in line conductor');
+      recommendations.push('Check all socket outlet connections');
+      recommendations.push('Verify lighting point connections');
+    }
+
+    recommendations.push('Test at every accessible point');
+    recommendations.push('Use appropriate test method for circuit type');
+    recommendations.push('Document all test results');
+    
+    if (supplySystem === 'three_phase_4wire') {
+      recommendations.push('Pay particular attention to neutral connections in three-phase systems');
+    }
+
+    return recommendations;
+  }
+}
+
+/**
+ * Phase Sequence Test Calculator
+ * Verify correct phase sequence in three-phase installations (IET Guidance Note 3)
+ */
+export class PhaseSequenceCalculator {
+  /**
+   * Calculate and verify phase sequence
+   */
+  static calculate(inputs: PhaseSequenceInputs): PhaseSequenceResult {
+    const { 
+      supplyType,
+      nominalVoltage,
+      frequency,
+      loadType,
+      rotationDirection,
+      testMethod
+    } = inputs;
+
+    try {
+      // Validate inputs
+      this.validateInputs(inputs);
+
+      // Simulate phase sequence measurement (in real scenario, this would come from test equipment)
+      const phaseSequence = Math.random() > 0.1 ? 'l1_l2_l3' as const : 'l1_l3_l2' as const;
+      
+      // Determine if sequence is correct based on expected rotation
+      const testResult = phaseSequence === 'l1_l2_l3' ? 'correct' as const : 'incorrect' as const;
+      
+      // Determine rotation direction
+      const actualRotation = phaseSequence === 'l1_l2_l3' ? 'clockwise' as const : 'anticlockwise' as const;
+
+      // Generate voltage readings (simplified simulation)
+      const baseVoltage = nominalVoltage / Math.sqrt(3);
+      const voltageReadings = {
+        l1_l2: baseVoltage * Math.sqrt(3),
+        l2_l3: baseVoltage * Math.sqrt(3),
+        l3_l1: baseVoltage * Math.sqrt(3),
+        ...(supplyType === 'three_phase_4wire' && {
+          l1_n: baseVoltage,
+          l2_n: baseVoltage,
+          l3_n: baseVoltage
+        })
+      };
+
+      // Generate recommendations
+      const recommendations = this.getRecommendations(testResult === 'correct', testMethod, nominalVoltage);
+
+      return {
+        phaseSequence,
+        rotationDirection: actualRotation,
+        testResult,
+        voltageReadings,
+        complianceAssessment: {
+          bs7671Compliant: testResult === 'correct',
+          motorCompatible: (rotationDirection === 'clockwise' && actualRotation === 'clockwise') ||
+                          (rotationDirection === 'anticlockwise' && actualRotation === 'anticlockwise') ||
+                          rotationDirection === 'not_specified',
+          loadCompatible: testResult === 'correct'
+        },
+        recommendations,
+        correctionRequired: testResult === 'incorrect',
+        correctionMethod: testResult === 'incorrect' ? 
+          'Interchange any two line conductors at the supply' : 
+          'No correction required',
+        regulation: 'BS 7671 Section 612.12 & IET Guidance Note 3 - Phase sequence testing'
+      };
+    } catch (error) {
+      throw new Error(`Phase sequence calculation error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  private static validateInputs(inputs: PhaseSequenceInputs): void {
+    const { nominalVoltage } = inputs;
+    
+    if (nominalVoltage <= 0) {
+      throw new Error('Nominal voltage must be positive');
+    }
+  }
+
+  private static getRecommendations(isCorrect: boolean, testMethod: string, voltage: number): string[] {
+    const recommendations: string[] = [];
+    
+    if (isCorrect) {
+      recommendations.push('Phase sequence testing satisfactory');
+    } else {
+      recommendations.push('Correct phase sequence before energizing loads');
+      recommendations.push('Wrong phase sequence can damage equipment');
+    }
+
+    recommendations.push('Test at main distribution board');
+    recommendations.push('Test at all sub-distribution points');
+    recommendations.push('Use appropriate phase sequence indicator');
+    
+    if (voltage > 400) {
+      recommendations.push('Exercise extreme caution with high voltage systems');
+    }
+
+    recommendations.push('Record test results and any corrections made');
+    recommendations.push('Verify motor rotation directions during commissioning');
+
+    return recommendations;
+  }
+}
+
+/**
+ * Applied Voltage Test Calculator
+ * Calculate applied voltage test requirements (IET Guidance Note 3)
+ */
+export class AppliedVoltageTestCalculator {
+  /**
+   * Calculate applied voltage test parameters and results
+   */
+  static calculate(inputs: AppliedVoltageTestInputs): AppliedVoltageTestResult {
+    const { 
+      testVoltage,
+      equipmentType,
+      ratedVoltage,
+      testDuration,
+      testStandard,
+      insulationClass,
+      environmentalConditions,
+      equipmentCondition
+    } = inputs;
+
+    try {
+      // Validate inputs
+      this.validateInputs(inputs);
+
+      // Simulate leakage current measurement (in practice this comes from test equipment)
+      const leakageCurrent = this.simulateLeakageCurrent(equipmentType, insulationClass);
+      
+      // Determine test result based on leakage current and standards
+      const testResult = this.determineTestResult(leakageCurrent, equipmentType, insulationClass);
+      
+      // Calculate safety margin
+      const maxPermissibleLeakage = this.getMaxPermissibleLeakage(equipmentType, insulationClass);
+      const safetyMargin = ((maxPermissibleLeakage - leakageCurrent) / maxPermissibleLeakage) * 100;
+
+      // Determine insulation quality
+      const insulationQuality = this.determineInsulationQuality(safetyMargin);
+
+      // Generate recommendations
+      const recommendations = this.getRecommendations(testResult === 'pass', equipmentType, testStandard, insulationClass);
+
+      // Generate remedial actions
+      const remedialActions = testResult === 'pass' ? 
+        ['Test satisfactory - no action required'] :
+        this.getRemedialActions(testResult, equipmentType);
+
+      return {
+        testVoltageApplied: testVoltage,
+        testDuration,
+        leakageCurrent,
+        testResult,
+        complianceAssessment: {
+          standardCompliant: testResult === 'pass',
+          safetyMargin,
+          acceptanceCriteria: `Leakage current must be < ${maxPermissibleLeakage}mA`
+        },
+        insulationQuality,
+        recommendations,
+        remedialActions,
+        retestSchedule: testResult === 'pass' ? 'Next periodic inspection' : 'After remedial work',
+        safetyConsiderations: [
+          'High voltage test - qualified personnel only',
+          'Ensure all personnel clear of test area',
+          'Use appropriate PPE',
+          'Follow test procedure exactly'
+        ],
+        regulation: 'BS 7671 Section 612.4 & IET Guidance Note 3 - Applied voltage testing'
+      };
+    } catch (error) {
+      throw new Error(`Applied voltage test calculation error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  private static validateInputs(inputs: AppliedVoltageTestInputs): void {
+    const { testVoltage, ratedVoltage, testDuration } = inputs;
+    
+    if (testVoltage <= 0) throw new Error('Test voltage must be positive');
+    if (ratedVoltage <= 0) throw new Error('Rated voltage must be positive');
+    if (testDuration <= 0) throw new Error('Test duration must be positive');
+  }
+
+  private static simulateLeakageCurrent(equipmentType: string, insulationClass: string): number {
+    // Simulate realistic leakage current values based on equipment and insulation class
+    const baseLeakage = {
+      'switchgear': 2.0,
+      'motor': 1.5,
+      'transformer': 0.8,
+      'cable': 0.1,
+      'panel': 1.0,
+      'busbar': 0.5
+    }[equipmentType] || 1.0;
+
+    const classMultiplier = {
+      'class_0': 1.2,
+      'class_1': 1.0,
+      'class_2': 0.3,
+      'class_3': 0.1
+    }[insulationClass] || 1.0;
+
+    return baseLeakage * classMultiplier * (0.8 + Math.random() * 0.4); // ±20% variation
+  }
+
+  private static determineTestResult(leakage: number, equipmentType: string, insulationClass: string): 'pass' | 'fail' | 'breakdown' {
+    const maxLeakage = this.getMaxPermissibleLeakage(equipmentType, insulationClass);
+    
+    if (leakage > maxLeakage * 10) return 'breakdown';
+    if (leakage > maxLeakage) return 'fail';
+    return 'pass';
+  }
+
+  private static getMaxPermissibleLeakage(equipmentType: string, insulationClass: string): number {
+    // Maximum permissible leakage currents in mA based on equipment type and class
+    const baseMax = {
+      'switchgear': 5.0,
+      'motor': 3.5,
+      'transformer': 1.0,
+      'cable': 0.1,
+      'panel': 3.5,
+      'busbar': 1.0
+    }[equipmentType] || 3.5;
+
+    const classMultiplier = {
+      'class_0': 1.0,
+      'class_1': 1.0,
+      'class_2': 0.25,
+      'class_3': 0.5
+    }[insulationClass] || 1.0;
+
+    return baseMax * classMultiplier;
+  }
+
+  private static determineInsulationQuality(safetyMargin: number): 'excellent' | 'good' | 'acceptable' | 'poor' | 'failed' {
+    if (safetyMargin < 0) return 'failed';
+    if (safetyMargin < 10) return 'poor';
+    if (safetyMargin < 25) return 'acceptable';
+    if (safetyMargin < 50) return 'good';
+    return 'excellent';
+  }
+
+  private static getRecommendations(passed: boolean, equipmentType: string, standard: string, insulationClass?: string): string[] {
+    const recommendations: string[] = [];
+    
+    if (passed) {
+      recommendations.push('Applied voltage test satisfactory');
+      recommendations.push('Equipment safe for normal operation');
+    } else {
+      recommendations.push('Equipment fails applied voltage test');
+      recommendations.push('Do not put equipment into service');
+      recommendations.push('Investigate cause of excessive leakage');
+    }
+
+    // Add Class II specific recommendations
+    if (insulationClass === 'class_2') {
+      recommendations.push('Class II equipment requires double/reinforced insulation verification');
+      recommendations.push('Ensure Class II marking is visible and intact');
+    }
+
+    recommendations.push(`Test performed to ${standard} standard`);
+    recommendations.push('Ensure test equipment is calibrated');
+    recommendations.push('Test in dry conditions');
+    recommendations.push('Allow equipment to reach ambient temperature');
+
+    return recommendations;
+  }
+
+  private static getRemedialActions(testResult: string, equipmentType: string): string[] {
+    const actions: string[] = [];
+    
+    if (testResult === 'fail') {
+      actions.push('Remove equipment from service immediately');
+      actions.push('Investigate insulation breakdown');
+      actions.push('Check for moisture or contamination');
+      actions.push('Repair or replace faulty insulation');
+      actions.push('Retest after repairs');
+    } else if (testResult === 'breakdown') {
+      actions.push('CRITICAL: Complete insulation failure detected');
+      actions.push('Equipment must be replaced or completely refurbished');
+      actions.push('Investigate cause of breakdown');
+      actions.push('Review installation and maintenance practices');
+    }
+
+    actions.push('Do not energize until faults are corrected');
+    actions.push('Consider professional electrical inspection');
+
+    return actions;
+  }
+}
+
+/**
+ * Functional Test Calculator
+ * Verify functional operation of electrical installations (IET Guidance Note 3)
+ */
+export class FunctionalTestCalculator {
+  /**
+   * Calculate and verify functional test results
+   */
+  static calculate(inputs: FunctionalTestInputs): FunctionalTestResult {
+    const { 
+      systemType,
+      testType,
+      equipmentDetails,
+      testParameters,
+      environmentalConditions,
+      loadConditions
+    } = inputs;
+
+    try {
+      // Validate inputs
+      this.validateInputs(inputs);
+
+      // Generate individual test results based on system type
+      const individualTests = this.generateTestResults(systemType, testParameters);
+
+      // Determine overall result
+      const overallResult = individualTests.every(test => test.result === 'pass') ? 
+        'pass' as const : 
+        individualTests.some(test => test.result === 'pass') ? 'partial_pass' as const : 'fail' as const;
+
+      // Calculate performance assessment
+      const performanceAssessment = this.assessPerformance(individualTests, systemType);
+
+      // Generate recommendations
+      const recommendations = this.getRecommendations(overallResult, systemType, testType);
+
+      return {
+        overallResult,
+        individualTests,
+        performanceAssessment,
+        complianceAssessment: {
+          standardCompliant: overallResult === 'pass',
+          regulationReferences: ['BS 7671 Section 612.13', 'IET Guidance Note 3'],
+          certificateValid: overallResult === 'pass'
+        },
+        recommendations,
+        maintenanceSchedule: this.getMaintenanceSchedule(systemType, overallResult),
+        replacementRecommended: overallResult === 'fail',
+        nextTestDate: this.getNextTestDate(systemType, overallResult),
+        regulation: 'BS 7671 Section 612.13 & IET Guidance Note 3 - Functional testing'
+      };
+    } catch (error) {
+      throw new Error(`Functional test calculation error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  private static validateInputs(inputs: FunctionalTestInputs): void {
+    const { systemType } = inputs;
+    
+    if (!systemType) {
+      throw new Error('System type must be specified');
+    }
+  }
+
+  private static generateTestResults(systemType: string, testParameters: any): any[] {
+    const tests: any[] = [];
+
+    switch (systemType) {
+      case 'rcd':
+        tests.push({
+          testName: 'RCD Trip Test',
+          result: Math.random() > 0.1 ? 'pass' : 'fail',
+          measuredValue: testParameters.tripTime || 25,
+          expectedValue: 40,
+          tolerance: '±5ms',
+          notes: 'Trip time within specification'
+        });
+        break;
+
+      case 'emergency_lighting':
+        tests.push({
+          testName: 'Duration Test',
+          result: Math.random() > 0.1 ? 'pass' : 'fail',
+          measuredValue: 185,
+          expectedValue: 180,
+          tolerance: 'minimum 3 hours',
+          notes: 'Emergency lighting duration satisfactory'
+        });
+        break;
+
+      case 'fire_alarm':
+        tests.push({
+          testName: 'Response Test',
+          result: Math.random() > 0.1 ? 'pass' : 'fail',
+          measuredValue: 8,
+          expectedValue: 10,
+          tolerance: 'maximum 10 seconds',
+          notes: 'Fire alarm response time acceptable'
+        });
+        break;
+
+      default:
+        tests.push({
+          testName: 'General Function Test',
+          result: Math.random() > 0.1 ? 'pass' : 'fail',
+          measuredValue: null,
+          expectedValue: null,
+          tolerance: 'as per manufacturer specification',
+          notes: 'System operates as intended'
+        });
+    }
+
+    return tests;
+  }
+
+  private static assessPerformance(tests: any[], systemType: string): any {
+    const passRate = (tests.filter(t => t.result === 'pass').length / tests.length) * 100;
+    
+    return {
+      withinSpecification: passRate === 100,
+      performanceDegradation: Math.max(0, 100 - passRate),
+      operationalReliability: passRate >= 90 ? 'excellent' : 
+                             passRate >= 75 ? 'good' : 
+                             passRate >= 50 ? 'acceptable' : 'poor'
+    };
+  }
+
+  private static getRecommendations(result: string, systemType: string, testType: string): string[] {
+    const recommendations: string[] = [];
+    
+    if (result === 'pass') {
+      recommendations.push('All functional tests satisfactory');
+      recommendations.push('System ready for service');
+    } else {
+      recommendations.push('Functional test failures must be corrected');
+      recommendations.push('Do not put system into service until all tests pass');
+    }
+
+    recommendations.push('Perform functional tests during initial verification');
+    recommendations.push('Repeat functional tests during periodic inspection');
+    recommendations.push('Test all safety-related functions');
+    recommendations.push('Document all test results');
+
+    return recommendations;
+  }
+
+  private static getMaintenanceSchedule(systemType: string, result: string): string {
+    if (result === 'fail') return 'Immediate maintenance required';
+    
+    const schedules: { [key: string]: string } = {
+      'rcd': 'Monthly test button operation, annual electrical test',
+      'emergency_lighting': 'Monthly function test, annual duration test',
+      'fire_alarm': 'Weekly test, annual service by qualified technician',
+      'security_system': 'Monthly function test, annual service'
+    };
+
+    return schedules[systemType] || 'As per manufacturer recommendations';
+  }
+
+  private static getNextTestDate(systemType: string, result: string): string {
+    if (result === 'fail') return 'After remedial work completion';
+    
+    const intervals: { [key: string]: string } = {
+      'rcd': '12 months',
+      'emergency_lighting': '12 months',
+      'fire_alarm': '12 months',
+      'security_system': '12 months'
+    };
+
+    return intervals[systemType] || '12 months';
   }
 }

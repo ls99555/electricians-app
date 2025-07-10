@@ -7,7 +7,7 @@ import {
   LoadCalculator, 
   MaximumDemandCalculator, 
   DiversityFactorCalculator 
-} from '../load-demand';
+} from '../core/load-demand';
 
 describe('LoadCalculator', () => {
   describe('calculate()', () => {

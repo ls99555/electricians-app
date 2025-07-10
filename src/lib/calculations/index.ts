@@ -3,29 +3,29 @@
  * Organized modular structure for better maintainability
  */
 
-// Export all types
-export * from './types';
+// Export all types from the new types directory
+export * from '../types';
 
-// Export basic calculations
+// Export core calculations
 export {
   OhmLawCalculator,
   VoltageDropCalculator,
   CableSizingCalculator
-} from './basic';
+} from './core/basic';
 
 // Export load and demand calculations
 export {
   LoadCalculator,
   MaximumDemandCalculator,
   DiversityFactorCalculator
-} from './load-demand';
+} from './core/load-demand';
 
 // Export cable and protection calculations
 export {
   CableDeratingCalculator,
   ProtectiveDeviceCalculator,
   ConduitFillCalculator
-} from './cable-protection';
+} from './core/cable-protection';
 
 // Export renewable energy calculations
 export {
@@ -48,25 +48,25 @@ export {
   FaultCurrentCalculator
 } from './safety-testing';
 
-// Export power systems calculations
+// Export advanced power systems calculations
 export {
   ThreePhaseCalculator,
   PowerFactorCalculator
-} from './power-systems';
+} from './advanced/power-systems';
 
-// Export motor and drive calculations
+// Export specialized motor and drive calculations
 export {
   MotorLoadCalculator,
   VFDSizingCalculator,
   MotorEfficiencyCalculator
-} from './motor-calculations';
+} from './specialized/motor-calculations';
 
 // Export specialized applications calculations
 export {
   FireAlarmCalculator,
   CCTVCalculator,
   DataCenterCalculator
-} from './specialized-applications';
+} from './specialized/specialized-applications';
 
 // Export capacity calculations
 export {
@@ -80,8 +80,43 @@ export {
 export {
   PartPComplianceCalculator,
   BuildingRegulationCalculator,
-  EnergyPerformanceCalculator
+  EnergyPerformanceCalculator,
+  SpecialLocationCalculator,
+  MedicalLocationCalculator,
+  EducationalFacilityCalculator,
+  CareHomeCalculator
 } from './building-regulations';
+
+// Export advanced calculations
+export {
+  ShortCircuitAnalysisCalculator,
+  VoltageRegulationCalculator,
+  HarmonicsAnalysisCalculator,
+  ArcFaultAnalysisCalculator,
+  PowerQualityAssessmentCalculator
+} from './advanced/advanced-calculations';
+
+// Export cable reference data and helper functions
+export {
+  CABLE_INSTALLATION_METHODS,
+  CABLE_CURRENT_RATINGS,
+  DERATING_FACTORS,
+  VOLTAGE_DROP_VALUES,
+  CABLE_ELECTRICAL_PROPERTIES,
+  ARMOURED_CABLE_SPECS,
+  FIRE_PERFORMANCE_CLASSES,
+  CableReferenceHelper
+} from './cable-references';
+
+// Export protection and safety reference data and helper functions
+export {
+  OVERCURRENT_PROTECTION_DEVICES,
+  RESIDUAL_CURRENT_DEVICES,
+  MAX_ZS_VALUES,
+  DISCONNECTION_TIMES,
+  TOUCH_VOLTAGE_LIMITS,
+  ProtectionSafetyHelper
+} from './protection-safety-references';
 
 // Utility functions
 export const ElectricalUtils = {

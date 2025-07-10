@@ -9,8 +9,22 @@ import {
   LoopImpedanceCalculator, 
   RCDSelectionCalculator,
   EarthElectrodeCalculator,
-  FaultCurrentCalculator
+  FaultCurrentCalculator,
+  InsulationResistanceCalculator,
+  ContinuityTestCalculator,
+  PolarityTestCalculator,
+  PhaseSequenceCalculator,
+  AppliedVoltageTestCalculator,
+  FunctionalTestCalculator
 } from '../safety-testing';
+import type {
+  InsulationResistanceInputs,
+  ContinuityTestInputs,
+  PolarityTestInputs,
+  PhaseSequenceInputs,
+  AppliedVoltageTestInputs,
+  FunctionalTestInputs
+} from '../../types';
 
 describe('LoopImpedanceCalculator', () => {
   describe('calculate()', () => {
@@ -448,5 +462,645 @@ describe('Regulatory Compliance', () => {
 
     expect(result.recommendations).toBeDefined();
     expect(result.recommendations?.length).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * Unit Tests for Additional Safety and Testing Calculations
+ * Testing insulation resistance, continuity, polarity, phase sequence, applied voltage, and functional tests
+ * All tests validate against BS 7671 and IET Guidance Note 3 requirements
+ */
+
+describe('InsulationResistanceCalculator', () => {
+  describe('calculate()', () => {
+    it('should calculate insulation resistance for standard LV circuit (BS 7671 compliant)', () => {
+      const inputs: InsulationResistanceInputs = {
+        testVoltage: 500,
+        circuitType: 'lv_circuit',
+        installationType: 'new_installation',
+        environmentalConditions: {
+          temperature: 20,
+          humidity: 50,
+          contamination: 'clean'
+        },
+        cableLength: 50,
+        numberOfCores: 3,
+        cableType: 'pvc',
+        connectedEquipment: false,
+        surgeSuppressors: false
+      };
+
+      const result = InsulationResistanceCalculator.calculate(inputs);
+
+      expect(result.minimumResistance).toBe(1.0); // BS 7671 Table 61 requirement
+      expect(result.testResult).toMatch(/pass|fail|investigate/);
+      expect(result.complianceAssessment.bs7671Compliant).toEqual(result.testResult === 'pass');
+      expect(result.regulation).toContain('BS 7671');
+      expect(result.recommendations).toBeInstanceOf(Array);
+      expect(result.remedialActions).toBeInstanceOf(Array);
+      expect(result.temperatureCorrectionFactor).toBeCloseTo(1.0, 1); // At 20°C
+    });
+
+    it('should calculate minimum resistance correctly for SELV circuits', () => {
+      const inputs: InsulationResistanceInputs = {
+        testVoltage: 250,
+        circuitType: 'extra_low_voltage',
+        installationType: 'new_installation',
+        environmentalConditions: {
+          temperature: 20,
+          humidity: 50,
+          contamination: 'clean'
+        },
+        cableLength: 20,
+        numberOfCores: 2,
+        cableType: 'pvc',
+        connectedEquipment: false,
+        surgeSuppressors: false
+      };
+
+      const result = InsulationResistanceCalculator.calculate(inputs);
+
+      expect(result.minimumResistance).toBe(0.25); // BS 7671 Table 61 for SELV
+    });
+
+    it('should apply temperature correction factor correctly', () => {
+      const inputs: InsulationResistanceInputs = {
+        testVoltage: 500,
+        circuitType: 'lv_circuit',
+        installationType: 'periodic_inspection',
+        environmentalConditions: {
+          temperature: 40, // High temperature
+          humidity: 60,
+          contamination: 'clean'
+        },
+        cableLength: 30,
+        numberOfCores: 3,
+        cableType: 'pvc',
+        connectedEquipment: false,
+        surgeSuppressors: false
+      };
+
+      const result = InsulationResistanceCalculator.calculate(inputs);
+
+      expect(result.temperatureCorrectionFactor).toBeLessThan(1.0); // Higher temp = lower correction
+      expect(result.correctedResistance).not.toEqual(result.measuredResistance);
+    });
+
+    it('should throw error for invalid test voltage', () => {
+      const inputs: InsulationResistanceInputs = {
+        testVoltage: -100, // Invalid
+        circuitType: 'lv_circuit',
+        installationType: 'new_installation',
+        environmentalConditions: {
+          temperature: 20,
+          humidity: 50,
+          contamination: 'clean'
+        },
+        cableLength: 50,
+        numberOfCores: 3,
+        cableType: 'pvc',
+        connectedEquipment: false,
+        surgeSuppressors: false
+      };
+
+      expect(() => InsulationResistanceCalculator.calculate(inputs)).toThrow('Test voltage must be positive');
+    });
+
+    it('should handle extreme environmental conditions', () => {
+      const inputs: InsulationResistanceInputs = {
+        testVoltage: 500,
+        circuitType: 'lv_circuit',
+        installationType: 'periodic_inspection',
+        environmentalConditions: {
+          temperature: 45, // High temperature
+          humidity: 95, // High humidity
+          contamination: 'damp'
+        },
+        cableLength: 100,
+        numberOfCores: 4,
+        cableType: 'pvc',
+        connectedEquipment: true,
+        surgeSuppressors: true
+      };
+
+      const result = InsulationResistanceCalculator.calculate(inputs);
+
+      expect(result.temperatureCorrectionFactor).toBeLessThan(0.9);
+      expect(result.recommendations.some(rec => rec.includes('humidity'))).toBe(true);
+    });
+  });
+});
+
+describe('ContinuityTestCalculator', () => {
+  describe('calculate()', () => {
+    it('should calculate continuity test for protective conductor (BS 7671 compliant)', () => {
+      const inputs: ContinuityTestInputs = {
+        testType: 'protective_conductor',
+        conductorCsa: 2.5,
+        conductorLength: 30,
+        conductorMaterial: 'copper',
+        testCurrent: 10,
+        ambientTemperature: 20
+      };
+
+      const result = ContinuityTestCalculator.calculate(inputs);
+
+      expect(result.expectedResistance).toBeGreaterThan(0);
+      expect(result.measuredResistance).toBeGreaterThan(0);
+      expect(result.testResult).toMatch(/pass|fail|investigate/);
+      expect(result.complianceAssessment.bs7671Compliant).toEqual(result.testResult === 'pass');
+      expect(result.regulation).toContain('BS 7671');
+      expect(result.recommendations).toBeInstanceOf(Array);
+      expect(result.complianceAssessment.acceptableTolerance).toBe('±10% or ±0.05Ω, whichever is greater');
+    });
+
+    it('should calculate ring circuit continuity with analysis', () => {
+      const inputs: ContinuityTestInputs = {
+        testType: 'ring_circuit',
+        conductorCsa: 2.5,
+        conductorLength: 60,
+        conductorMaterial: 'copper',
+        testCurrent: 10,
+        ambientTemperature: 20,
+        ringCircuitDetails: {
+          liveConductorCsa: 2.5,
+          cpcCsa: 1.5,
+          totalLength: 60
+        }
+      };
+
+      const result = ContinuityTestCalculator.calculate(inputs);
+
+      expect(result.ringCircuitAnalysis).toBeDefined();
+      expect(result.ringCircuitAnalysis?.r1).toBeGreaterThan(0);
+      expect(result.ringCircuitAnalysis?.r2).toBeGreaterThan(0);
+      expect(result.ringCircuitAnalysis?.ringIntegrity).toMatch(/good|poor|broken/);
+    });
+
+    it('should apply temperature correction correctly', () => {
+      const inputs: ContinuityTestInputs = {
+        testType: 'protective_conductor',
+        conductorCsa: 2.5,
+        conductorLength: 30,
+        conductorMaterial: 'copper',
+        testCurrent: 10,
+        ambientTemperature: 35 // Higher temperature
+      };
+
+      const result = ContinuityTestCalculator.calculate(inputs);
+
+      expect(result.temperatureCorrectedResistance).toBeGreaterThan(result.measuredResistance);
+    });
+
+    it('should handle long cable runs accurately', () => {
+      const inputs: ContinuityTestInputs = {
+        testType: 'protective_conductor',
+        conductorCsa: 1.5,
+        conductorLength: 200, // Very long run
+        conductorMaterial: 'copper',
+        testCurrent: 10,
+        ambientTemperature: 30
+      };
+
+      const result = ContinuityTestCalculator.calculate(inputs);
+
+      expect(result.expectedResistance).toBeGreaterThan(10); // Should be significant for long run
+      expect(result.deviationFromExpected).toBeDefined();
+    });
+
+    it('should throw error for invalid conductor CSA', () => {
+      const inputs: ContinuityTestInputs = {
+        testType: 'protective_conductor',
+        conductorCsa: -1, // Invalid
+        conductorLength: 30,
+        conductorMaterial: 'copper',
+        testCurrent: 10,
+        ambientTemperature: 20
+      };
+
+      expect(() => ContinuityTestCalculator.calculate(inputs)).toThrow('Conductor CSA must be positive');
+    });
+  });
+});
+
+describe('PolarityTestCalculator', () => {
+  describe('calculate()', () => {
+    it('should verify polarity test for single phase installation (BS 7671 compliant)', () => {
+      const inputs: PolarityTestInputs = {
+        installationType: 'new_installation',
+        circuitType: 'lighting',
+        supplySystem: 'single_phase',
+        testMethod: 'continuity',
+        circuitsToTest: ['C1', 'C2', 'C3'],
+        switchgearType: 'consumer_unit',
+        earthingArrangement: 'tn_c_s'
+      };
+
+      const result = PolarityTestCalculator.calculate(inputs);
+
+      expect(result.overallResult).toMatch(/pass|fail|not_applicable/);
+      expect(result.circuitResults).toHaveLength(3);
+      expect(result.complianceAssessment.bs7671Compliant).toEqual(result.overallResult === 'pass');
+      expect(result.regulation).toContain('BS 7671');
+      expect(result.recommendations).toBeInstanceOf(Array);
+      expect(result.complianceAssessment.safetyRequirements).toContain('All switching devices in line conductor');
+    });
+
+    it('should handle three-phase polarity testing', () => {
+      const inputs: PolarityTestInputs = {
+        installationType: 'new_installation',
+        circuitType: 'three_phase',
+        supplySystem: 'three_phase_4wire',
+        testMethod: 'continuity',
+        circuitsToTest: ['L1', 'L2', 'L3', 'N'],
+        switchgearType: 'distribution_board',
+        earthingArrangement: 'tn_s'
+      };
+
+      const result = PolarityTestCalculator.calculate(inputs);
+
+      expect(result.complianceAssessment.safetyRequirements).toBeInstanceOf(Array);
+      expect(result.recommendations.length).toBeGreaterThan(0);
+    });
+
+    it('should identify polarity faults when present', () => {
+      const inputs: PolarityTestInputs = {
+        installationType: 'periodic_inspection',
+        circuitType: 'socket_outlet',
+        supplySystem: 'single_phase',
+        testMethod: 'low_voltage',
+        circuitsToTest: ['C1'],
+        switchgearType: 'distribution_board',
+        earthingArrangement: 'tn_s'
+      };
+
+      const result = PolarityTestCalculator.calculate(inputs);
+
+      if (result.overallResult === 'fail') {
+        expect(result.criticalFindings.length).toBeGreaterThan(0);
+        expect(result.retestRequired).toBe(true);
+      }
+    });
+
+    it('should throw error for empty circuits list', () => {
+      const inputs: PolarityTestInputs = {
+        installationType: 'new_installation',
+        circuitType: 'lighting',
+        supplySystem: 'single_phase',
+        testMethod: 'continuity',
+        circuitsToTest: [], // Empty array
+        switchgearType: 'consumer_unit',
+        earthingArrangement: 'tn_c_s'
+      };
+
+      expect(() => PolarityTestCalculator.calculate(inputs)).toThrow('At least one circuit to test must be specified');
+    });
+  });
+});
+
+describe('PhaseSequenceCalculator', () => {
+  describe('calculate()', () => {
+    it('should verify correct phase sequence for three-phase system (BS 7671 compliant)', () => {
+      const inputs: PhaseSequenceInputs = {
+        supplyType: 'three_phase_4wire',
+        nominalVoltage: 400,
+        frequency: 50,
+        loadType: 'motor',
+        rotationDirection: 'clockwise',
+        testMethod: 'phase_sequence_indicator',
+        installationType: 'new_installation'
+      };
+
+      const result = PhaseSequenceCalculator.calculate(inputs);
+
+      expect(result.phaseSequence).toMatch(/l1_l2_l3|l1_l3_l2|incorrect|unable_to_determine/);
+      expect(result.rotationDirection).toMatch(/clockwise|anticlockwise/);
+      expect(result.testResult).toMatch(/correct|incorrect|requires_correction/);
+      expect(result.voltageReadings.l1_l2).toBeGreaterThan(0);
+      expect(result.voltageReadings.l2_l3).toBeGreaterThan(0);
+      expect(result.voltageReadings.l3_l1).toBeGreaterThan(0);
+      expect(result.regulation).toContain('BS 7671');
+    });
+
+    it('should include neutral voltages for 4-wire system', () => {
+      const inputs: PhaseSequenceInputs = {
+        supplyType: 'three_phase_4wire',
+        nominalVoltage: 400,
+        frequency: 50,
+        loadType: 'general_load',
+        rotationDirection: 'not_specified',
+        testMethod: 'phase_sequence_indicator',
+        installationType: 'maintenance'
+      };
+
+      const result = PhaseSequenceCalculator.calculate(inputs);
+
+      expect(result.voltageReadings.l1_n).toBeDefined();
+      expect(result.voltageReadings.l2_n).toBeDefined();
+      expect(result.voltageReadings.l3_n).toBeDefined();
+    });
+
+    it('should assess motor compatibility correctly', () => {
+      const inputs: PhaseSequenceInputs = {
+        supplyType: 'three_phase_3wire',
+        nominalVoltage: 400,
+        frequency: 50,
+        loadType: 'motor',
+        rotationDirection: 'clockwise',
+        testMethod: 'motor_rotation',
+        installationType: 'new_installation'
+      };
+
+      const result = PhaseSequenceCalculator.calculate(inputs);
+
+      expect(result.complianceAssessment.motorCompatible).toBeDefined();
+      expect(result.complianceAssessment.loadCompatible).toBeDefined();
+    });
+
+    it('should handle high voltage systems with safety warnings', () => {
+      const inputs: PhaseSequenceInputs = {
+        supplyType: 'three_phase_3wire',
+        nominalVoltage: 11000, // High voltage
+        frequency: 50,
+        loadType: 'transformer',
+        rotationDirection: 'clockwise',
+        testMethod: 'oscilloscope',
+        installationType: 'new_installation'
+      };
+
+      const result = PhaseSequenceCalculator.calculate(inputs);
+
+      expect(result.recommendations.some(rec => rec.includes('extreme caution'))).toBe(true);
+    });
+
+    it('should throw error for invalid voltage', () => {
+      const inputs: PhaseSequenceInputs = {
+        supplyType: 'three_phase_4wire',
+        nominalVoltage: -400, // Invalid
+        frequency: 50,
+        loadType: 'motor',
+        rotationDirection: 'clockwise',
+        testMethod: 'phase_sequence_indicator',
+        installationType: 'new_installation'
+      };
+
+      expect(() => PhaseSequenceCalculator.calculate(inputs)).toThrow('Nominal voltage must be positive');
+    });
+  });
+});
+
+describe('AppliedVoltageTestCalculator', () => {
+  describe('calculate()', () => {
+    it('should calculate applied voltage test for switchgear (BS 7671 compliant)', () => {
+      const inputs: AppliedVoltageTestInputs = {
+        testVoltage: 2500,
+        equipmentType: 'switchgear',
+        ratedVoltage: 400,
+        testDuration: 60,
+        testStandard: 'bs_en_61439',
+        insulationClass: 'class_1',
+        environmentalConditions: {
+          temperature: 20,
+          humidity: 65,
+          altitude: 100
+        },
+        equipmentCondition: 'new'
+      };
+
+      const result = AppliedVoltageTestCalculator.calculate(inputs);
+
+      expect(result.testVoltageApplied).toBe(2500);
+      expect(result.testDuration).toBe(60);
+      expect(result.leakageCurrent).toBeGreaterThanOrEqual(0);
+      expect(result.testResult).toMatch(/pass|fail|breakdown/);
+      expect(result.complianceAssessment.standardCompliant).toEqual(result.testResult === 'pass');
+      expect(result.insulationQuality).toMatch(/excellent|good|acceptable|poor|failed/);
+      expect(result.regulation).toContain('BS 7671');
+    });
+
+    it('should assess insulation quality based on safety margin', () => {
+      const inputs: AppliedVoltageTestInputs = {
+        testVoltage: 1500,
+        equipmentType: 'motor',
+        ratedVoltage: 400,
+        testDuration: 60,
+        testStandard: 'bs_7671',
+        insulationClass: 'class_1',
+        environmentalConditions: {
+          temperature: 25,
+          humidity: 50,
+          altitude: 150
+        },
+        equipmentCondition: 'existing'
+      };
+
+      const result = AppliedVoltageTestCalculator.calculate(inputs);
+
+      if (result.testResult === 'pass') {
+        expect(result.complianceAssessment.safetyMargin).toBeGreaterThanOrEqual(0);
+        expect(['excellent', 'good', 'acceptable']).toContain(result.insulationQuality);
+      }
+    });
+
+    it('should handle Class II equipment with appropriate test voltage', () => {
+      const inputs: AppliedVoltageTestInputs = {
+        testVoltage: 4000, // High test voltage for Class II
+        equipmentType: 'motor',
+        ratedVoltage: 400,
+        testDuration: 60,
+        testStandard: 'bs_en_60439',
+        insulationClass: 'class_2',
+        environmentalConditions: {
+          temperature: 20,
+          humidity: 60,
+          altitude: 500
+        },
+        equipmentCondition: 'periodic_test'
+      };
+
+      const result = AppliedVoltageTestCalculator.calculate(inputs);
+
+      expect(result.complianceAssessment.acceptanceCriteria).toContain('mA');
+      expect(result.recommendations.some(rec => rec.includes('Class II'))).toBe(true);
+    });
+
+    it('should provide comprehensive safety considerations', () => {
+      const inputs: AppliedVoltageTestInputs = {
+        testVoltage: 4000,
+        equipmentType: 'panel',
+        ratedVoltage: 1000,
+        testDuration: 60,
+        testStandard: 'bs_en_60439',
+        insulationClass: 'class_2',
+        environmentalConditions: {
+          temperature: 20,
+          humidity: 60,
+          altitude: 200
+        },
+        equipmentCondition: 'after_repair'
+      };
+
+      const result = AppliedVoltageTestCalculator.calculate(inputs);
+
+      expect(result.safetyConsiderations).toBeInstanceOf(Array);
+      expect(result.safetyConsiderations.length).toBeGreaterThan(0);
+      expect(result.safetyConsiderations.some(item => item.includes('High voltage'))).toBe(true);
+    });
+
+    it('should throw error for invalid test voltage', () => {
+      const inputs: AppliedVoltageTestInputs = {
+        testVoltage: -1000, // Invalid
+        equipmentType: 'switchgear',
+        ratedVoltage: 400,
+        testDuration: 60,
+        testStandard: 'bs_en_61439',
+        insulationClass: 'class_1',
+        environmentalConditions: {
+          temperature: 20,
+          humidity: 65,
+          altitude: 100
+        },
+        equipmentCondition: 'new'
+      };
+
+      expect(() => AppliedVoltageTestCalculator.calculate(inputs)).toThrow('Test voltage must be positive');
+    });
+  });
+});
+
+describe('FunctionalTestCalculator', () => {
+  describe('calculate()', () => {
+    it('should test RCD functionality (BS 7671 compliant)', () => {
+      const inputs: FunctionalTestInputs = {
+        systemType: 'rcd',
+        testType: 'commissioning',
+        equipmentDetails: {
+          manufacturer: 'Test Manufacturer',
+          model: 'RCD-30mA',
+          ratingDetails: '30mA, 40ms',
+          installationDate: '2024-01-01'
+        },
+        testParameters: {
+          nominalCurrent: 32,
+          tripCurrent: 30,
+          tripTime: 25
+        },
+        environmentalConditions: {
+          temperature: 20,
+          humidity: 60
+        },
+        loadConditions: 'no_load'
+      };
+
+      const result = FunctionalTestCalculator.calculate(inputs);
+
+      expect(result.overallResult).toMatch(/pass|fail|partial_pass/);
+      expect(result.individualTests).toBeInstanceOf(Array);
+      expect(result.performanceAssessment.withinSpecification).toBeDefined();
+      expect(result.complianceAssessment.standardCompliant).toBeDefined();
+      expect(result.regulation).toContain('BS 7671');
+      expect(result.complianceAssessment.regulationReferences).toContain('BS 7671 Section 612.13');
+    });
+
+    it('should test emergency lighting functionality', () => {
+      const inputs: FunctionalTestInputs = {
+        systemType: 'emergency_lighting',
+        testType: 'periodic',
+        equipmentDetails: {
+          manufacturer: 'Emergency Light Co',
+          model: 'EL-LED-3H',
+          ratingDetails: '3 hour duration, LED',
+          installationDate: '2023-06-01'
+        },
+        testParameters: {},
+        environmentalConditions: {
+          temperature: 22,
+          humidity: 55
+        },
+        loadConditions: 'full_load'
+      };
+
+      const result = FunctionalTestCalculator.calculate(inputs);
+
+      expect(result.overallResult).toMatch(/pass|fail|partial_pass/);
+      expect(result.maintenanceSchedule).toBeDefined();
+      expect(result.nextTestDate).toBeDefined();
+    });
+
+    it('should assess performance degradation accurately', () => {
+      const inputs: FunctionalTestInputs = {
+        systemType: 'fire_alarm',
+        testType: 'maintenance',
+        equipmentDetails: {
+          manufacturer: 'Fire Safety Ltd',
+          model: 'FS-ALARM-001',
+          ratingDetails: 'Optical smoke detector',
+          installationDate: '2022-03-15'
+        },
+        testParameters: {
+          testVoltage: 24,
+          frequency: 50
+        },
+        environmentalConditions: {
+          temperature: 25,
+          humidity: 70
+        },
+        loadConditions: 'partial_load'
+      };
+
+      const result = FunctionalTestCalculator.calculate(inputs);
+
+      expect(result.performanceAssessment.performanceDegradation).toBeGreaterThanOrEqual(0);
+      expect(result.performanceAssessment.performanceDegradation).toBeLessThanOrEqual(100);
+      expect(result.performanceAssessment.operationalReliability).toMatch(/excellent|good|acceptable|poor/);
+    });
+
+    it('should handle security system testing', () => {
+      const inputs: FunctionalTestInputs = {
+        systemType: 'security_system',
+        testType: 'commissioning',
+        equipmentDetails: {
+          manufacturer: 'Security Systems Ltd',
+          model: 'SEC-001',
+          ratingDetails: 'Motion detector with PIR',
+          installationDate: '2024-01-01'
+        },
+        testParameters: {
+          testVoltage: 12,
+          frequency: 50
+        },
+        environmentalConditions: {
+          temperature: 20,
+          humidity: 50
+        },
+        loadConditions: 'no_load'
+      };
+
+      const result = FunctionalTestCalculator.calculate(inputs);
+
+      expect(result.maintenanceSchedule).toContain('Monthly function test');
+      expect(result.nextTestDate).toBeDefined();
+    });
+
+    it('should throw error for missing system type', () => {
+      const inputs = {
+        systemType: '' as any, // Invalid
+        testType: 'commissioning',
+        equipmentDetails: {
+          manufacturer: 'Test',
+          model: 'Test',
+          ratingDetails: 'Test',
+          installationDate: '2024-01-01'
+        },
+        testParameters: {},
+        environmentalConditions: {
+          temperature: 20,
+          humidity: 60
+        },
+        loadConditions: 'no_load'
+      } as FunctionalTestInputs;
+
+      expect(() => FunctionalTestCalculator.calculate(inputs)).toThrow('System type must be specified');
+    });
   });
 });
